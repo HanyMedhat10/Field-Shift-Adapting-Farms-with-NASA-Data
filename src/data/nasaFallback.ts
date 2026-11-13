@@ -3,27 +3,28 @@ import { GovernorateInfo } from "./governorates";
 export interface AnnualClimateRecord {
   year: number;
   t2mMeanC: number;
-  t2mMaxC: number;
+  gwetRoot: number;
   solarRadiationKwhM2Day: number;
   precipMmDay: number;
   /** Deviation from 10-year mean temperature in °C */
   tempAnomalyC: number;
-  /** Composite moisture index (0.35 - 1.15) */
+  /** Composite moisture index (0.40 - 1.15) */
   moistureIndex: number;
 }
 
 export interface MultiScaleTelemetry {
   power: {
     source: string;
+    labelAr: string;
     period: string;
     meanT2mC: number;
-    meanT2mMaxC: number;
     solarRadiation: number;
     thermalAnomalyC: number;
     heatWaveYearsCount: number;
   };
   modis: {
     source: string;
+    labelAr: string;
     product: string;
     acquisitionDate: string;
     ndviValue: number;
@@ -32,6 +33,7 @@ export interface MultiScaleTelemetry {
   };
   smap: {
     source: string;
+    labelAr: string;
     product: string;
     gwetRoot: number;
     rootMoisturePct: number;
@@ -39,6 +41,7 @@ export interface MultiScaleTelemetry {
   };
   asf: {
     source: string;
+    labelAr: string;
     granuleName: string;
     acquisitionDate: string;
     polarization: string;
@@ -69,27 +72,33 @@ export function getFallbackAnnualClimate(
   lon: number
 ): AnnualClimateRecord[] {
   const latShift = (30.5 - lat) * 0.48;
-  const lonShift = Math.abs(lon - 31.0) * 0.08;
+  const lonDrift = Math.sin(lon * 1.9) * 0.02;
   const baseTemp = gov.baselineTempC + latShift * 0.25;
 
   return EGYPT_CLIMATE_CURVE_2015_2024.map((item) => {
     const t2mMeanC = Number((baseTemp + item.tempDelta).toFixed(2));
-    const t2mMaxC = Number((t2mMeanC + 9.4 + lonShift).toFixed(2));
+    const gwetRoot = Number(
+      Math.min(
+        0.85,
+        Math.max(0.15, gov.baselineSmapRoot * item.moistFactor + lonDrift)
+      ).toFixed(2)
+    );
     const solarRadiationKwhM2Day = Number(
       (5.45 + (31.0 - lat) * 0.14 + item.solarDelta).toFixed(2)
     );
     const precipMmDay = Number(
       Math.max(0.01, (lat > 30 ? 0.18 : 0.04) * item.moistFactor).toFixed(3)
     );
+
     return {
       year: item.year,
       t2mMeanC,
-      t2mMaxC,
+      gwetRoot,
       solarRadiationKwhM2Day,
       precipMmDay,
       tempAnomalyC: Number((item.tempDelta + (lat < 28 ? 0.35 : 0.15)).toFixed(2)),
       moistureIndex: Number(
-        Math.min(1.12, Math.max(0.45, item.moistFactor * (gov.baselineSmapRoot + 0.45))).toFixed(2)
+        Math.min(1.12, Math.max(0.45, item.moistFactor * (gwetRoot + 0.45))).toFixed(2)
       ),
     };
   });
@@ -111,15 +120,15 @@ export function getFallbackMultiScale(
       annualRecords.reduce((acc, r) => acc + r.t2mMeanC, 0) / annualRecords.length
     ).toFixed(2)
   );
-  const meanT2mMaxC = Number(
-    (
-      annualRecords.reduce((acc, r) => acc + r.t2mMaxC, 0) / annualRecords.length
-    ).toFixed(2)
-  );
   const solarRadiation = Number(
     (
       annualRecords.reduce((acc, r) => acc + r.solarRadiationKwhM2Day, 0) /
       annualRecords.length
+    ).toFixed(2)
+  );
+  const meanGwetRoot = Number(
+    (
+      annualRecords.reduce((acc, r) => acc + r.gwetRoot, 0) / annualRecords.length
     ).toFixed(2)
   );
   const latestAnomaly = annualRecords[annualRecords.length - 1]?.tempAnomalyC ?? 1.1;
@@ -130,7 +139,7 @@ export function getFallbackMultiScale(
     Math.min(0.88, Math.max(0.18, gov.baselineNdvi + coordDrift)).toFixed(2)
   );
   const gwetRoot = Number(
-    Math.min(0.85, Math.max(0.15, gov.baselineSmapRoot + coordDrift * 0.7)).toFixed(2)
+    Math.min(0.85, Math.max(0.15, meanGwetRoot + coordDrift * 0.5)).toFixed(2)
   );
 
   const vvDb = Number((-9.8 + (gwetRoot - 0.45) * 4.6).toFixed(2));
@@ -139,43 +148,46 @@ export function getFallbackMultiScale(
   return {
     power: {
       source: "NASA POWER Monthly API (2015–2024)",
+      labelAr: "متوسط الحرارة من قمر ناسا (NASA POWER)",
       period: "2015 - 2024 (10 سنوات)",
       meanT2mC,
-      meanT2mMaxC,
       solarRadiation,
       thermalAnomalyC: latestAnomaly,
       heatWaveYearsCount,
     },
     modis: {
       source: "NASA GIBS / MODIS Terra 8-Day",
+      labelAr: "صحة الغطاء النباتي من قمر ناسا (MODIS NDVI)",
       product: "MODIS_Terra_NDVI_8Day",
       acquisitionDate: "2024-05-01",
       ndviValue,
       canopyStatusAr:
         ndviValue >= 0.65
-          ? "غطاء نباتي كثيف ونشط"
+          ? "غطاء نباتي أخضر ونشط"
           : ndviValue >= 0.45
-          ? "غطاء نباتي متوسط الاستقرار"
+          ? "غطاء نباتي متوسط"
           : "غطاء نباتي خفيف / إجهاد موسمي",
       previousStressAr:
         ndviValue < 0.5
-          ? "مؤشر إجهاد مائي/حراري في نهاية الموسم السابق"
-          : "تغطية جيدة مع حاجة لتجديد النيتروجين",
+          ? "رصد إجهاد مائي/حراري في المحصول السابق"
+          : "نمو متوازن مع حاجة لتجديد الأزوت طبيعياً",
     },
     smap: {
-      source: "NASA SMAP L4 Root-Zone",
-      product: "SPL4SMGP (GWETROOT)",
+      source: "NASA POWER / SMAP GWETROOT",
+      labelAr: "رطوبة التربة من قمر ناسا (SMAP)",
+      product: "GWETROOT (منطقة الجذور)",
       gwetRoot,
       rootMoisturePct: Math.round(gwetRoot * 100),
       statusAr:
         gwetRoot >= 0.52
-          ? "رطوبة جذور متوازنة تدعم البقوليات"
+          ? "رطوبة تربة جيدة تدعم زراعة البقوليات"
           : gwetRoot >= 0.35
-          ? "رطوبة متوسطة تتطلب جدولة ري دقيقة"
-          : "عجز رطوبة في منطقة الجذور — يوصى بمحاصيل عميقة الجذور",
+          ? "رطوبة متوسطة تحتاج تنظيم فترات الري"
+          : "جفاف في منطقة الجذور — يوصى بمحاصيل عميقة الجذور",
     },
     asf: {
       source: "ASF DAAC Sentinel-1 C-SAR",
+      labelAr: "رصد الرادار المخترق للسحب (Sentinel-1)",
       granuleName:
         liveAsf?.granuleName ??
         `S1A_IW_GRDH_1SDV_${gov.id.toUpperCase()}_20240504T1551`,
@@ -183,11 +195,11 @@ export function getFallbackMultiScale(
       polarization: liveAsf?.polarization ?? "VV+VH",
       vvBackscatterDb: vvDb,
       vhBackscatterDb: vhDb,
-      cloudPenetrationStatusAr: "اختراق كامل للسحب والغبار (C-Band SAR)",
+      cloudPenetrationStatusAr: "اختراق كامل للسحب والغبار",
       surfaceMoistureHintAr:
         vvDb > -10.2
-          ? "انعاكس راداري يشير لرطوبة سطحية مناسبة للإنبات"
-          : "انخفاض التشتت الخلفي يشير لجفاف الطبقة السطحية",
+          ? "رطوبة سطحية مناسبة للزراعة والإنبات"
+          : "جفاف بالطبقة السطحية يتطلب رية محاياة مبكرة",
     },
   };
 }
@@ -239,9 +251,14 @@ export function buildRawNasaPayload(params: {
       geometry: { type: "Point", coordinates: [lon, lat, 22.0] },
       parameters: {
         T2M: Object.fromEntries(annualRecords.map((r) => [String(r.year), r.t2mMeanC])),
-        T2M_MAX: Object.fromEntries(annualRecords.map((r) => [String(r.year), r.t2mMaxC])),
+        GWETROOT: Object.fromEntries(
+          annualRecords.map((r) => [String(r.year), r.gwetRoot])
+        ),
         ALLSKY_SFC_SW_DWN: Object.fromEntries(
           annualRecords.map((r) => [String(r.year), r.solarRadiationKwhM2Day])
+        ),
+        PRECTOTCORR: Object.fromEntries(
+          annualRecords.map((r) => [String(r.year), r.precipMmDay])
         ),
       },
     },
@@ -262,4 +279,3 @@ export function buildRawNasaPayload(params: {
     },
   };
 }
-

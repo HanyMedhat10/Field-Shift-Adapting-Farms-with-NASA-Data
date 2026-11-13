@@ -29,7 +29,7 @@ function parseNasaPowerAnnualRecords(
         properties?: {
           parameter?: {
             T2M?: Record<string, number>;
-            T2M_MAX?: Record<string, number>;
+            GWETROOT?: Record<string, number>;
             ALLSKY_SFC_SW_DWN?: Record<string, number>;
             PRECTOTCORR?: Record<string, number>;
           };
@@ -41,24 +41,27 @@ function parseNasaPowerAnnualRecords(
 
     const yearBuckets: Record<
       number,
-      { t2m: number[]; t2mMax: number[]; solar: number[]; precip: number[] }
+      { t2m: number[]; gwetRoot: number[]; solar: number[]; precip: number[] }
     > = {};
 
     for (const [key, val] of Object.entries(params.T2M)) {
       const year = parseYearFromPowerKey(key);
       if (!year || val < -50 || val > 70) continue;
       if (!yearBuckets[year]) {
-        yearBuckets[year] = { t2m: [], t2mMax: [], solar: [], precip: [] };
+        yearBuckets[year] = { t2m: [], gwetRoot: [], solar: [], precip: [] };
       }
       yearBuckets[year].t2m.push(val);
-      const tMaxVal = params.T2M_MAX?.[key];
-      if (typeof tMaxVal === "number" && tMaxVal > -50 && tMaxVal < 75) {
-        yearBuckets[year].t2mMax.push(tMaxVal);
+
+      const gwetVal = params.GWETROOT?.[key];
+      if (typeof gwetVal === "number" && gwetVal >= 0 && gwetVal <= 1) {
+        yearBuckets[year].gwetRoot.push(gwetVal);
       }
+
       const solarVal = params.ALLSKY_SFC_SW_DWN?.[key];
       if (typeof solarVal === "number" && solarVal >= 0 && solarVal < 20) {
         yearBuckets[year].solar.push(solarVal);
       }
+
       const precipVal = params.PRECTOTCORR?.[key];
       if (typeof precipVal === "number" && precipVal >= 0 && precipVal < 100) {
         yearBuckets[year].precip.push(precipVal);
@@ -80,7 +83,7 @@ function parseNasaPowerAnnualRecords(
       return {
         year: y,
         t2mMeanC: Number(avg(yearBuckets[y].t2m, fb.t2mMeanC).toFixed(2)),
-        t2mMaxC: Number(avg(yearBuckets[y].t2mMax, fb.t2mMaxC).toFixed(2)),
+        gwetRoot: Number(avg(yearBuckets[y].gwetRoot, fb.gwetRoot).toFixed(2)),
         solarRadiationKwhM2Day: Number(
           avg(yearBuckets[y].solar, fb.solarRadiationKwhM2Day).toFixed(2)
         ),
@@ -95,12 +98,15 @@ function parseNasaPowerAnnualRecords(
     return rawMeans.map((r) => {
       const tempAnomalyC = Number((r.t2mMeanC - tenYearMean).toFixed(2));
       const moistureIndex = Number(
-        Math.min(1.12, Math.max(0.55, r.fb.moistureIndex - tempAnomalyC * 0.06)).toFixed(2)
+        Math.min(
+          1.12,
+          Math.max(0.45, r.gwetRoot + 0.45 - tempAnomalyC * 0.04)
+        ).toFixed(2)
       );
       return {
         year: r.year,
         t2mMeanC: r.t2mMeanC,
-        t2mMaxC: r.t2mMaxC,
+        gwetRoot: r.gwetRoot,
         solarRadiationKwhM2Day: r.solarRadiationKwhM2Day,
         precipMmDay: r.precipMmDay,
         tempAnomalyC,
@@ -156,7 +162,7 @@ async function handleFieldShift(params: {
 
   const fallbackAnnual = getFallbackAnnualClimate(matchedGov, lat, lon);
 
-  const powerEndpoint = `https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M,T2M_MAX,ALLSKY_SFC_SW_DWN,PRECTOTCORR&community=AG&longitude=${lon.toFixed(
+  const powerEndpoint = `https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M,GWETROOT,ALLSKY_SFC_SW_DWN,PRECTOTCORR&community=AG&longitude=${lon.toFixed(
     4
   )}&latitude=${lat.toFixed(4)}&start=2015&end=2024&format=JSON`;
 
@@ -173,16 +179,20 @@ async function handleFieldShift(params: {
     | { granuleName?: string; acquisitionDate?: string; polarization?: string }
     | undefined = undefined;
 
-  // Fetch NASA POWER Monthly API & ASF Search API concurrently with 6s timeout & 24h Next.js Data Cache
+  const powerController = new AbortController();
+  const powerTimeout = setTimeout(() => powerController.abort(), 6000);
+  const asfController = new AbortController();
+  const asfTimeout = setTimeout(() => asfController.abort(), 6000);
+
   const [powerSettled, asfSettled] = await Promise.allSettled([
     fetch(powerEndpoint, {
       next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(6000),
-    }),
+      signal: powerController.signal,
+    }).finally(() => clearTimeout(powerTimeout)),
     fetch(asfEndpoint, {
       next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(6000),
-    }),
+      signal: asfController.signal,
+    }).finally(() => clearTimeout(asfTimeout)),
   ]);
 
   if (powerSettled.status === "fulfilled" && powerSettled.value.ok) {
@@ -199,8 +209,8 @@ async function handleFieldShift(params: {
             T2M: Object.fromEntries(
               Object.entries(json.properties?.parameter?.T2M ?? {}).slice(-12)
             ),
-            T2M_MAX: Object.fromEntries(
-              Object.entries(json.properties?.parameter?.T2M_MAX ?? {}).slice(-12)
+            GWETROOT: Object.fromEntries(
+              Object.entries(json.properties?.parameter?.GWETROOT ?? {}).slice(-12)
             ),
           },
         };
@@ -288,7 +298,7 @@ async function handleFieldShift(params: {
       modeLabelAr:
         powerLive || asfLive
           ? "متصل ببيانات ناسا الحية"
-          : "وضع الطوارئ المحلي (Offline Fallback)",
+          : "بيانات دلتا النيل المحفوظة (Offline Fallback)",
     },
     rawJson,
   });
@@ -296,17 +306,20 @@ async function handleFieldShift(params: {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const prevCrop =
+    searchParams.get("prev_crop") ?? searchParams.get("prevCropId") ?? undefined;
+  const heatRaw =
+    searchParams.get("heat_shock_c") ?? searchParams.get("heatStressC");
+  const waterRaw =
+    searchParams.get("water_deficit_pct") ?? searchParams.get("waterDeficitPct");
+
   return handleFieldShift({
     govId: searchParams.get("govId") ?? undefined,
     lat: searchParams.has("lat") ? Number(searchParams.get("lat")) : undefined,
     lon: searchParams.has("lon") ? Number(searchParams.get("lon")) : undefined,
-    prevCropId: searchParams.get("prevCropId") ?? undefined,
-    heatStressC: searchParams.has("heatStressC")
-      ? Number(searchParams.get("heatStressC"))
-      : undefined,
-    waterDeficitPct: searchParams.has("waterDeficitPct")
-      ? Number(searchParams.get("waterDeficitPct"))
-      : undefined,
+    prevCropId: prevCrop,
+    heatStressC: heatRaw !== null ? Number(heatRaw) : undefined,
+    waterDeficitPct: waterRaw !== null ? Number(waterRaw) : undefined,
     selectedPathway: searchParams.get("selectedPathway") ?? undefined,
   });
 }
@@ -314,9 +327,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    return handleFieldShift(body ?? {});
+    return handleFieldShift({
+      govId: body?.govId,
+      lat: body?.lat,
+      lon: body?.lon,
+      prevCropId: body?.prev_crop ?? body?.prevCropId,
+      heatStressC: body?.heat_shock_c ?? body?.heatStressC,
+      waterDeficitPct: body?.water_deficit_pct ?? body?.waterDeficitPct,
+      selectedPathway: body?.selectedPathway,
+    });
   } catch {
     return handleFieldShift({});
   }
 }
-

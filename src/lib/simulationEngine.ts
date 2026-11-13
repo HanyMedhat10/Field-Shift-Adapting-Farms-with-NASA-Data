@@ -34,6 +34,7 @@ export interface PathwaySimulationResult {
   titleAr: string;
   badgeAr: string;
   summaryAr: string;
+  plainSummaryLinesAr: [string, string, string];
   colorTheme: "success" | "danger" | "primary";
   seasons: [CropInfo, CropInfo, CropInfo];
   hasFamilyConflict: boolean;
@@ -43,6 +44,9 @@ export interface PathwaySimulationResult {
   p90Egp: number;
   cvPct: number;
   annualProfitsEgp: number[];
+  /** Net Urea 46% bags (total_n_impact / 23): positive = natural savings, negative = extra sacks bought */
+  netUreaBags: number;
+  /** Urea 46% sacks saved compared to the Cash pathway */
   ureaSacksSaved: number;
   waterSavedPct: number;
   totalWaterM3: number;
@@ -74,20 +78,20 @@ function getPathwayCropIds(
       return {
         balanced: ["fava", "maize", "berseem"],
         cash: ["potato", "tomato", "potato"],
-        resilient: ["peanut", "sugarbeet", "sunflower"],
+        resilient: ["soybean", "sugarbeet", "sunflower"],
       };
     case "maize":
       return {
         balanced: ["berseem", "soybean", "sugarbeet"],
         cash: ["wheat", "maize", "potato"],
-        resilient: ["fava", "sunflower", "peanut"],
+        resilient: ["fava", "sunflower", "sugarbeet"],
       };
     case "wheat":
     default:
       return {
         balanced: ["soybean", "sugarbeet", "berseem"],
         cash: ["maize", "potato", "wheat"],
-        resilient: ["peanut", "sunflower", "fava"],
+        resilient: ["fava", "sunflower", "sugarbeet"],
       };
   }
 }
@@ -105,7 +109,7 @@ function detectFamilyConflict(
     if (sequence[i].family === sequence[i - 1].family) {
       return {
         hasConflict: true,
-        detailsAr: `تعارض نباتي: تكرار العائلة ${sequence[i].familyAr} (${sequence[i - 1].nameAr} ← ${sequence[i].nameAr}) يرفع مخاطر الآفات والنيمانودا (-22% من الإنتاج).`,
+        detailsAr: `تنبيه تعارض نباتي (-18%): زراعة ${sequence[i].nameAr} بعد ${sequence[i - 1].nameAr} تكرر العائلة ${sequence[i].familyAr} وترفع مخاطر الآفات والنيماتودا.`,
       };
     }
   }
@@ -113,7 +117,7 @@ function detectFamilyConflict(
   if (families.size < 3 && seasons.some((c) => c.family === prevCrop.family)) {
     return {
       hasConflict: true,
-      detailsAr: `تداخل في العائلة ${prevCrop.familyAr} خلال 3 مواسم يضعف خصوبة التربة.`,
+      detailsAr: `تنبيه (-18%): تكرار العائلة ${prevCrop.familyAr} خلال 3 مواسم يضعف التربة ويزيد الآفات.`,
     };
   }
   return { hasConflict: false, detailsAr: null };
@@ -140,7 +144,6 @@ function buildFieldGrid(
   ];
 
   return sectorLabels.map((labelAr, idx) => {
-    // Minor spatial heterogeneity across the 9 sub-plots of the feddan
     const microFactor = idx === 4 ? 1.04 : idx === 8 ? 0.94 : 0.97 + (idx % 3) * 0.025;
     const netN = Math.round(
       ((seasons[0].nitrogenKgPerFeddan +
@@ -164,7 +167,8 @@ function buildFieldGrid(
     );
 
     const plotConflict =
-      hasConflict && (seasons[0].family === prevCrop.family || seasons[1].family === seasons[0].family);
+      hasConflict &&
+      (seasons[0].family === prevCrop.family || seasons[1].family === seasons[0].family);
 
     return {
       index: idx + 1,
@@ -174,7 +178,7 @@ function buildFieldGrid(
       season3Crop: seasons[2],
       hasConflict: plotConflict,
       conflictReasonAr: plotConflict
-        ? `تراكم أمراض العائلة ${seasons[0].familyAr} في التربة`
+        ? `تراكم آفات العائلة ${seasons[0].familyAr} (-18%)`
         : null,
       nitrogenBalanceKg: netN,
       waterDemandM3: totalWater,
@@ -190,7 +194,6 @@ export function runFieldShiftSimulation(
   const prevCrop = CROPS_MATRIX[prevCropId];
   const mapping = getPathwayCropIds(prevCropId);
 
-  // First pass: compute raw metrics for each pathway so savings can compare against Cash pathway
   const rawResults: Record<
     PathwayId,
     {
@@ -228,7 +231,6 @@ export function runFieldShiftSimulation(
     const avgHeatTolerance =
       seasons.reduce((sum, c) => sum + c.heatToleranceC, 0) / 3;
 
-    // Simulate 10 historical years (2015-2024) + user stress sliders
     const annualProfitsEgp = annualRecords.map((yearRec) => {
       let seasonSum = 0;
 
@@ -238,7 +240,6 @@ export function runFieldShiftSimulation(
         const heatExcess = Math.max(0, effectiveHeatC - crop.heatToleranceC);
         const heatPenalty = Math.min(0.46, heatExcess * 0.145);
 
-        // Dry year amplifies water deficit
         const effectiveWaterDeficit =
           waterDeficitPct + (1 - yearRec.moistureIndex) * 14;
         const droughtExcess = Math.max(
@@ -247,18 +248,15 @@ export function runFieldShiftSimulation(
         );
         const droughtPenalty = Math.min(0.48, droughtExcess * 0.013);
 
-        // Nitrogen fertilization cost/saving (Urea 46% cost ~ 950 EGP/50kg sack = 23kg N)
+        // Urea 46% fertilizer saving/cost (~950 EGP per 50kg bag = 23kg N)
         const nAdjustmentEgp =
           crop.nitrogenKgPerFeddan > 0
-            ? crop.nitrogenKgPerFeddan * 44
+            ? crop.nitrogenKgPerFeddan * 42
             : crop.nitrogenKgPerFeddan * 38;
 
-        // Progressive soil fatigue penalty on Cash rotation
-        const sequenceConflictPenalty = conflict.hasConflict
-          ? 0.21 + sIdx * 0.04
-          : 0;
+        // Exact 18% botanical family clash penalty (pest/nematode penalty)
+        const sequenceConflictPenalty = conflict.hasConflict ? 0.18 : 0;
 
-        // Deep root bonus in water-stressed years
         const rootResilienceBonus =
           crop.rootDepthCm >= 120 && waterDeficitPct >= 15 ? 0.07 : 0;
 
@@ -302,21 +300,21 @@ export function runFieldShiftSimulation(
       titleAr: "المسار المتوازن الذكي",
       badgeAr: "موصى به",
       summaryAr:
-        "يدمج البقوليات لتثبيت النيتروجين طبيعياً وكسر دورة الآفات مع استقرار عائد 3 مواسم.",
+        "يدخل البقوليات لتثبيت النيتروجين طبيعياً، يكسر دورة الآفات، ويوفر شكاير سماد اليوريا.",
       colorTheme: "success",
     },
     cash: {
       titleAr: "المسار النقدي السريع",
       badgeAr: "عالي المخاطرة",
       summaryAr:
-        "محاصيل نقدية متتالية ترفع ذروة الربح في السنوات المثالية لكنها تستنزف التربة وتنهار في موجات الحر.",
+        "محاصيل نقدية سريعة العائد لكنها تكشف استنزاف التربة وخصم 18% عند تكرار العائلة النباتية.",
       colorTheme: "danger",
     },
     resilient: {
       titleAr: "مسار الصمود المناخي وتوفير المياه",
       badgeAr: "تحمل الحر والجفاف",
       summaryAr:
-        "محاصيل جذور عميقة تتحمل العجز المائي وموجات الحر القصوى بأقل تقلب في الدخل.",
+        "محاصيل جذور عميقة تتحمل العطش وموجات الحر بأقل خسارة في سنوات الجفاف.",
       colorTheme: "primary",
     },
   };
@@ -327,7 +325,6 @@ export function runFieldShiftSimulation(
     const raw = rawResults[pid];
     const sorted = [...raw.annualProfitsEgp].sort((a, b) => a - b);
 
-    // PRD Section 5 exact formula: P10 = index 1, P50 = avg(index 4, 5), P90 = index 8
     const p10Egp = sorted[1];
     const p50Egp = Math.round((sorted[4] + sorted[5]) / 2);
     const p90Egp = sorted[8];
@@ -340,7 +337,8 @@ export function runFieldShiftSimulation(
     const stdDev = Math.sqrt(variance);
     const cvPct = Number(((stdDev / Math.max(1, mean)) * 100).toFixed(1));
 
-    // 1 sack of Urea (50kg, 46% N) = 23 kg pure Nitrogen
+    // Net Urea 46% bags = total_n_impact / 23
+    const netUreaBags = Number((raw.netNitrogenKg / 23).toFixed(1));
     const nitrogenDeltaVsCash = raw.netNitrogenKg - cashNitrogenKg;
     const ureaSacksSaved = Math.max(
       0,
@@ -394,11 +392,35 @@ export function runFieldShiftSimulation(
       waterDeficitPct
     );
 
+    const p10Txt = p10Egp.toLocaleString("en-US");
+    const p50Txt = p50Egp.toLocaleString("en-US");
+    const plainSummaryLinesAr: [string, string, string] =
+      pid === "cash"
+        ? [
+            `في أسوأ سنة مناخية ينزل دخلك إلى ${p10Txt} ج/فدان (مقابل متوسط ${p50Txt} ج) بسبب حساسية المحاصيل للحر والعطش.`,
+            `هذا المسار يستهلك ${Math.abs(netUreaBags)} شكارة سماد يوريا 46% إضافية ويسحب كمية أكبر من مياه الري.`,
+            raw.hasConflict
+              ? `يقع في تكرار العائلة النباتية بعد ${prevCrop.nameAr} مما يخصم 18% من الإنتاج بسبب الآفات والنيماتودا.`
+              : `لا يعوّض خصوبة التربة طبيعياً بعد ${prevCrop.nameAr} ويزيد تكلفة التسميد في المواسم القادمة.`,
+          ]
+        : pid === "resilient"
+        ? [
+            `يحمي جيبك في أسوأ سنة مناخية بحد أدنى ${p10Txt} ج/فدان وبمتوسط ${p50Txt} ج حتى مع زيادة الحرارة (+${heatStressC}°C).`,
+            `يوفر ${waterSavedPct}% من مياه الري ويوفر ${ureaSacksSaved} شكارة سماد يوريا مقارنة بالمسار النقدي بفضل الجذور العميقة.`,
+            `ينوّع العائلات النباتية بعد ${prevCrop.nameAr} تماماً ليمنع خصم الآفات (-18%) ويحافظ على رطوبة التربة.`,
+          ]
+        : [
+            `يحافظ على دخل متوازن يصل في أسوأ سنة إلى ${p10Txt} ج/فدان وبمتوسط متوقع ${p50Txt} ج عبر 3 مواسم متكاملة.`,
+            `يزرع البقوليات لتثبيت النيتروجين مما يوفر لك ${ureaSacksSaved} شكارة سماد يوريا 46% ويخفض مياه الري بنسبة ${waterSavedPct}%.`,
+            `يكسر دورة الآفات بعد ${prevCrop.nameAr} بدون أي تكرار للعائلة النباتية، فيحمي أرضك من خصم الـ 18% ومن إجهاد السماد.`,
+          ];
+
     finalResults[pid] = {
       id: pid,
       titleAr: metaByPathway[pid].titleAr,
       badgeAr: metaByPathway[pid].badgeAr,
       summaryAr: metaByPathway[pid].summaryAr,
+      plainSummaryLinesAr,
       colorTheme: metaByPathway[pid].colorTheme,
       seasons: raw.seasons,
       hasFamilyConflict: raw.hasConflict,
@@ -408,6 +430,7 @@ export function runFieldShiftSimulation(
       p90Egp,
       cvPct,
       annualProfitsEgp: raw.annualProfitsEgp,
+      netUreaBags,
       ureaSacksSaved,
       waterSavedPct,
       totalWaterM3: raw.totalWaterM3,
@@ -420,4 +443,3 @@ export function runFieldShiftSimulation(
 
   return finalResults;
 }
-

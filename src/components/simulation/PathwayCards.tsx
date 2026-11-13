@@ -26,7 +26,7 @@ export function PathwayCards({
   onSelectPathway,
 }: PathwayCardsProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       {ORDERED_IDS.map((pid) => {
         const item = pathways[pid];
         const isSelected = selectedPathwayId === pid;
@@ -55,95 +55,104 @@ export function PathwayCards({
             className={`border transition-colors ${borderClass}`}
             shadow="none"
           >
-            <CardBody className="p-3 gap-2 text-right">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    className={`h-4 w-4 shrink-0 ${
-                      pid === "balanced"
-                        ? "text-emerald-400"
-                        : pid === "cash"
-                        ? "text-rose-400"
-                        : "text-sky-400"
-                    }`}
-                  />
-                  <span className="text-sm font-bold text-slate-100">
-                    {item.titleAr}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Chip
-                    size="sm"
-                    variant="flat"
-                    color={item.colorTheme}
-                    className="h-5 text-[11px] font-semibold"
-                  >
-                    {item.badgeAr}
-                  </Chip>
-                  {isSelected && (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  )}
-                </div>
-              </div>
-
-              {/* 3-Season Sequence with Botanical Family Pills */}
-              <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                {item.seasons.map((crop, idx) => (
-                  <div
-                    key={`${pid}-${crop.id}-${idx}`}
-                    className="flex items-center gap-1"
-                  >
-                    <span className="inline-flex items-center gap-1 rounded-md bg-[#0d1421] border border-slate-700/80 px-2 py-0.5 text-slate-200 font-medium">
-                      <span>
-                        {idx + 1}. {crop.nameAr}
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        ({crop.familyAr})
-                      </span>
+            <CardBody className="p-3.5 gap-2.5 text-right flex flex-col justify-between">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      className={`h-4 w-4 shrink-0 ${
+                        pid === "balanced"
+                          ? "text-emerald-400"
+                          : pid === "cash"
+                          ? "text-rose-400"
+                          : "text-sky-400"
+                      }`}
+                    />
+                    <span className="text-sm font-bold text-slate-100 leading-snug">
+                      {item.titleAr}
                     </span>
-                    {idx < 2 && <ArrowLeft className="h-3 w-3 text-slate-500" />}
                   </div>
-                ))}
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      color={item.colorTheme}
+                      className="h-5 text-[11px] font-semibold"
+                    >
+                      {item.badgeAr}
+                    </Chip>
+                    {isSelected && (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {item.summaryAr}
+                </p>
+
+                {/* 3-Season Sequence */}
+                <div className="flex flex-wrap items-center gap-1.5 text-xs pt-0.5">
+                  {item.seasons.map((crop, idx) => (
+                    <div
+                      key={`${pid}-${crop.id}-${idx}`}
+                      className="flex items-center gap-1"
+                    >
+                      <span className="inline-flex items-center gap-1 rounded-md bg-[#0d1421] border border-slate-700/80 px-2 py-0.5 text-slate-100 font-semibold">
+                        <span>
+                          {idx + 1}. {crop.nameAr}
+                        </span>
+                        <span className="text-[10px] font-normal text-slate-400">
+                          ({crop.familyAr})
+                        </span>
+                      </span>
+                      {idx < 2 && <ArrowLeft className="h-3 w-3 text-slate-500" />}
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-slate-800/80 text-[11px]">
-                <div className="flex items-center gap-2 text-slate-300 tabular-telemetry">
-                  <span>
-                    P10:{" "}
-                    <strong className="text-amber-300">
-                      {item.p10Egp.toLocaleString("en-US")} ج
-                    </strong>
-                  </span>
-                  <span className="text-slate-600">|</span>
-                  <span>
-                    P50:{" "}
+              <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between gap-2 text-xs tabular-telemetry">
+                  <span className="text-slate-300">
+                    المتوسط المتوقع:{" "}
                     <strong className="text-slate-50">
                       {item.p50Egp.toLocaleString("en-US")} ج
                     </strong>
                   </span>
-                </div>
-
-                <div className="flex items-center gap-2 tabular-telemetry">
-                  {item.ureaSacksSaved > 0 && (
-                    <span className="flex items-center gap-1 text-emerald-300 font-semibold">
-                      <PackageCheck className="h-3 w-3" />
-                      +{item.ureaSacksSaved} شكارة
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1 text-sky-300 font-semibold">
-                    <Droplets className="h-3 w-3" />
-                    {item.waterSavedPct}% ماء
+                  <span className="text-amber-300">
+                    أسوأ سنة: <strong>{item.p10Egp.toLocaleString("en-US")} ج</strong>
                   </span>
                 </div>
-              </div>
 
-              {item.hasFamilyConflict && item.conflictDetailsAr && (
-                <div className="flex items-start gap-1.5 rounded-md bg-rose-500/10 border border-rose-500/35 px-2.5 py-1.5 text-[11px] text-rose-200 leading-snug">
-                  <AlertTriangle className="h-3.5 w-3.5 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{item.conflictDetailsAr}</span>
+                <div className="flex items-center justify-between gap-2 text-[11px] tabular-telemetry">
+                  <span
+                    className={`flex items-center gap-1 font-semibold ${
+                      item.netUreaBags >= 0 ? "text-emerald-300" : "text-rose-300"
+                    }`}
+                  >
+                    <PackageCheck className="h-3.5 w-3.5" />
+                    {item.ureaSacksSaved > 0
+                      ? `توفير ${item.ureaSacksSaved} شكارة يوريا`
+                      : item.netUreaBags < 0
+                      ? `يحتاج ${Math.abs(item.netUreaBags)} شكارة يوريا إضافية`
+                      : "متعادل سمادياً"}
+                  </span>
+
+                  <span className="flex items-center gap-1 text-sky-300 font-semibold">
+                    <Droplets className="h-3.5 w-3.5" />
+                    توفير {item.waterSavedPct}% ماء
+                  </span>
                 </div>
-              )}
+
+                {item.hasFamilyConflict && item.conflictDetailsAr && (
+                  <div className="flex items-start gap-1.5 rounded-md bg-rose-500/10 border border-rose-500/35 px-2.5 py-1.5 text-[11px] text-rose-200 leading-snug">
+                    <AlertTriangle className="h-3.5 w-3.5 text-rose-400 shrink-0 mt-0.5" />
+                    <span>{item.conflictDetailsAr}</span>
+                  </div>
+                )}
+              </div>
             </CardBody>
           </Card>
         );

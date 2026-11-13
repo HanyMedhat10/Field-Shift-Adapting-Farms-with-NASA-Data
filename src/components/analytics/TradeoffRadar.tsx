@@ -85,24 +85,28 @@ export function TradeoffRadar({
   }
 
   const axisItems = [
-    { label: "العائد", value: selectedPathway.radar.cashReturn },
-    { label: "المياه", value: selectedPathway.radar.waterSaving },
-    { label: "النيتروجين", value: selectedPathway.radar.nitrogenCharge },
-    { label: "الحرارة", value: selectedPathway.radar.heatResilience },
-    { label: "الآفات", value: selectedPathway.radar.pestBreak },
+    { label: "الربح المادي", value: selectedPathway.radar.cashReturn },
+    { label: "توفير المياه", value: selectedPathway.radar.waterSaving },
+    { label: "خصوبة التربة", value: selectedPathway.radar.nitrogenCharge },
+    { label: "تحمل الحر", value: selectedPathway.radar.heatResilience },
+    { label: "مقاومة الآفات", value: selectedPathway.radar.pestBreak },
   ];
 
   return (
-    <div className="hud-subpanel rounded-lg p-2.5 flex flex-col gap-2">
-      <div className="h-[215px] w-full">
+    <div className="hud-subpanel rounded-lg p-3 flex flex-col gap-2.5">
+      <div className="text-xs font-bold text-slate-200">
+        مقارنة المكاسب والتضحيات (أمام المسار النقدي)
+      </div>
+
+      <div className="h-[225px] w-full">
         <Radar
           data={{
             labels: [
-              "العائد النقدي",
+              "الربح المادي",
               "توفير المياه",
-              "شحن النيتروجين",
-              "صمود الحرارة",
-              "كسر الآفات",
+              "خصوبة التربة",
+              "تحمل الحر",
+              "مقاومة الآفات",
             ],
             datasets,
           }}
@@ -151,15 +155,15 @@ export function TradeoffRadar({
         />
       </div>
 
-      <div className="grid grid-cols-5 gap-1 pt-1.5 border-t border-slate-800/80 text-center">
+      <div className="grid grid-cols-5 gap-1.5 pt-2 border-t border-slate-800/80 text-center">
         {axisItems.map((axis) => (
           <div
             key={axis.label}
-            className="rounded bg-[#0d1421] border border-slate-800/80 py-1 px-1"
+            className="rounded-md bg-[#0d1421] border border-slate-800/80 py-1.5 px-1"
           >
             <div className="text-[10px] text-slate-400 truncate">{axis.label}</div>
             <div className="text-xs font-bold text-slate-100 tabular-telemetry">
-              {axis.value}
+              {axis.value}/100
             </div>
           </div>
         ))}

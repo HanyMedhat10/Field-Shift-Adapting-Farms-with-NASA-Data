@@ -1,6 +1,13 @@
 "use client";
 
-import { Select, SelectItem, Skeleton } from "@heroui/react";
+import {
+  Button,
+  ButtonGroup,
+  Chip,
+  Select,
+  SelectItem,
+  Skeleton,
+} from "@heroui/react";
 import { AiCopilotCard } from "@/components/analytics/AiCopilotCard";
 import { TradeoffRadar } from "@/components/analytics/TradeoffRadar";
 import { UncertaintyBands } from "@/components/analytics/UncertaintyBands";
@@ -11,7 +18,11 @@ import { MultiScaleTabs } from "@/components/map/MultiScaleTabs";
 import { FieldGrid3x3 } from "@/components/simulation/FieldGrid3x3";
 import { PathwayCards } from "@/components/simulation/PathwayCards";
 import { StressSliders } from "@/components/simulation/StressSliders";
-import { CROPS_MATRIX, PreviousCropId } from "@/data/cropsMatrix";
+import {
+  CROPS_MATRIX,
+  PREVIOUS_CROPS,
+  PreviousCropId,
+} from "@/data/cropsMatrix";
 import { findNearestGovernorate, GOVERNORATES } from "@/data/governorates";
 import {
   buildRawNasaPayload,
@@ -20,14 +31,20 @@ import {
 } from "@/data/nasaFallback";
 import { PathwayId, runFieldShiftSimulation } from "@/lib/simulationEngine";
 import { CopilotApiResponse, FieldShiftApiResponse } from "@/types/fieldShift";
-import { Compass, LineChart, MapPin, SlidersHorizontal } from "lucide-react";
+import {
+  Compass,
+  GitCompareArrows,
+  MapPin,
+  SlidersHorizontal,
+  Sprout,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const FarmMap = dynamic(() => import("@/components/map/FarmMap"), {
+const FarmMap = dynamic(() => import("@/components/FarmMap"), {
   ssr: false,
   loading: () => (
-    <Skeleton className="h-[240px] w-full rounded-xl bg-slate-900 border border-slate-800" />
+    <Skeleton className="h-[250px] w-full rounded-xl bg-slate-900 border border-slate-800" />
   ),
 });
 
@@ -66,7 +83,7 @@ function buildInitialState(): FieldShiftApiResponse {
     sourceStatus: {
       powerLive: false,
       asfLive: false,
-      modeLabelAr: "جاري التحميل من أقمار ناسا...",
+      modeLabelAr: "بيانات دلتا النيل المحفوظة (Offline Fallback)",
     },
     rawJson: buildRawNasaPayload({
       gov,
@@ -202,7 +219,7 @@ export default function OrbitAgriCockpitPage() {
             )} جنيه/فدان مع توفير ${selected.ureaSacksSaved} شكارة يوريا و${selected.waterSavedPct}% من مياه الري.`,
             actionChecklistAr: [
               `حافظ على تنويع العائلة النباتية بعد ${prevCrop.nameAr}.`,
-              `استعد لموجة حر +${simState.heatStressC}°C بمتابعة رطوبة الجذور SMAP.`,
+              `استعد لموجة حر +${simState.heatStressC}°C بمتابعة رطوبة التربة من قمر ناسا (SMAP).`,
             ],
           });
         }
@@ -215,7 +232,7 @@ export default function OrbitAgriCockpitPage() {
     []
   );
 
-  // Sync live NASA POWER & ASF data from /api/field-shift when coordinates/gov change
+  // Sync live NASA POWER & ASF data from GET /api/field-shift
   useEffect(() => {
     const timer = setTimeout(async () => {
       fieldAbortRef.current?.abort();
@@ -223,19 +240,18 @@ export default function OrbitAgriCockpitPage() {
       fieldAbortRef.current = controller;
 
       try {
-        const res = await fetch("/api/field-shift", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const qs = new URLSearchParams({
+          govId,
+          lat: coords.lat.toFixed(4),
+          lon: coords.lon.toFixed(4),
+          prev_crop: prevCropId,
+          heat_shock_c: String(heatStressC),
+          water_deficit_pct: String(waterDeficitPct),
+          selectedPathway: selectedPathwayId,
+        });
+        const res = await fetch(`/api/field-shift?${qs.toString()}`, {
+          method: "GET",
           signal: controller.signal,
-          body: JSON.stringify({
-            govId,
-            lat: coords.lat,
-            lon: coords.lon,
-            prevCropId,
-            heatStressC,
-            waterDeficitPct,
-            selectedPathway: selectedPathwayId,
-          }),
         });
 
         if (!res.ok) return;
@@ -247,7 +263,15 @@ export default function OrbitAgriCockpitPage() {
     }, 220);
 
     return () => clearTimeout(timer);
-  }, [govId, coords.lat, coords.lon, prevCropId, heatStressC, waterDeficitPct, selectedPathwayId]);
+  }, [
+    govId,
+    coords.lat,
+    coords.lon,
+    prevCropId,
+    heatStressC,
+    waterDeficitPct,
+    selectedPathwayId,
+  ]);
 
   // Trigger AI Copilot summary cleanly after simulation updates
   useEffect(() => {
@@ -281,16 +305,17 @@ export default function OrbitAgriCockpitPage() {
 
   const activePathway = instantData.pathways[selectedPathwayId];
   const cashPathway = instantData.pathways.cash;
+  const activePrevFamilyAr = CROPS_MATRIX[prevCropId]?.familyAr ?? "";
 
   return (
     <div className="min-h-screen flex flex-col bg-[#070b12] text-slate-100">
       <TopMissionBar
-        soilHealthScore={instantData.hudMetrics.soilHealthScore}
-        colorTheme={instantData.hudMetrics.colorTheme}
-        ureaSacksSaved={instantData.hudMetrics.ureaSacksSaved}
-        waterSavedPct={instantData.hudMetrics.waterSavedPct}
         governorateNameAr={instantData.governorate.nameAr}
         coordinates={instantData.coordinates}
+        thermalAnomalyC={instantData.multiScale.power.thermalAnomalyC}
+        rootMoisturePct={instantData.multiScale.smap.rootMoisturePct}
+        ureaSacksSaved={instantData.hudMetrics.ureaSacksSaved}
+        waterSavedPct={instantData.hudMetrics.waterSavedPct}
         isLiveNasa={
           instantData.sourceStatus.powerLive || instantData.sourceStatus.asfLive
         }
@@ -298,53 +323,95 @@ export default function OrbitAgriCockpitPage() {
         onOpenPitchModal={() => setIsPitchModalOpen(true)}
       />
 
-      <main className="mx-auto w-full max-w-[1600px] flex-1 p-3 lg:p-4">
-        <div className="grid grid-cols-12 gap-3.5 items-start">
-          {/* Right Column: Satellite Map & Multi-Scale Observations */}
+      <main className="mx-auto w-full max-w-[1440px] flex-1 p-4 lg:p-6 flex flex-col gap-5">
+        {/* Step 1 & Step 2 Row */}
+        <div className="grid grid-cols-12 gap-4 items-stretch">
+          {/* Step 1: أرضك والمحصول السابق */}
           <section
-            aria-label="الخريطة الفضائية ومقاييس الرصد"
-            className="col-span-12 lg:col-span-4 hud-panel rounded-xl p-3.5 flex flex-col gap-3"
+            aria-label="الخطوة الأولى: أرضك والمحصول السابق"
+            className="col-span-12 lg:col-span-7 hud-panel rounded-2xl p-4 lg:p-5 flex flex-col gap-4"
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Compass className="h-4 w-4 text-sky-400" />
-                <h1 className="text-sm font-bold text-slate-100">
-                  الرصد الفضائي متعدد المقاييس
+                <Compass className="h-5 w-5 text-emerald-400 shrink-0" />
+                <h1 className="text-base font-bold text-slate-50">
+                  ١. أرضك والمحصول السابق
                 </h1>
               </div>
-              <span className="text-[11px] text-slate-400">
-                {instantData.governorate.soilTypeAr}
+              <span className="text-xs text-slate-400">
+                تربة {instantData.governorate.soilTypeAr}
               </span>
             </div>
 
-            <Select
-              label="اختر المحافظة الزراعية"
-              size="sm"
-              variant="bordered"
-              selectedKeys={[govId]}
-              onSelectionChange={(keys) => {
-                const first = Array.from(keys)[0];
-                if (typeof first === "string") {
-                  handleSelectGovernorate(first);
-                }
-              }}
-              startContent={<MapPin className="h-4 w-4 text-emerald-400" />}
-              classNames={{
-                trigger: "bg-[#090f1b] border-slate-800 hover:border-slate-700",
-                label: "text-slate-400 text-xs",
-                value: "text-slate-100 font-semibold text-xs",
-                popoverContent: "bg-[#0d1421] border border-slate-700 text-slate-100",
-              }}
-            >
-              {GOVERNORATES.map((gov) => (
-                <SelectItem key={gov.id} textValue={gov.nameAr}>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold">{gov.nameAr}</span>
-                    <span className="text-xs text-slate-400">{gov.regionAr}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-end">
+              <Select
+                label="اختر المحافظة (أو اضغط على الخريطة)"
+                size="sm"
+                variant="bordered"
+                selectedKeys={[govId]}
+                onSelectionChange={(keys) => {
+                  const first = Array.from(keys)[0];
+                  if (typeof first === "string") {
+                    handleSelectGovernorate(first);
+                  }
+                }}
+                startContent={<MapPin className="h-4 w-4 text-emerald-400" />}
+                classNames={{
+                  trigger: "bg-[#090f1b] border-slate-800 hover:border-slate-700",
+                  label: "text-slate-400 text-xs",
+                  value: "text-slate-100 font-semibold text-xs",
+                  popoverContent:
+                    "bg-[#0d1421] border border-slate-700 text-slate-100",
+                }}
+              >
+                {GOVERNORATES.map((gov) => (
+                  <SelectItem key={gov.id} textValue={gov.nameAr}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold">{gov.nameAr}</span>
+                      <span className="text-xs text-slate-400">
+                        {gov.regionAr}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </Select>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2 text-xs text-slate-200">
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    <Sprout className="h-3.5 w-3.5 text-emerald-400" />
+                    المحصول السابق
+                  </span>
+                  <Chip
+                    size="sm"
+                    variant="flat"
+                    className="h-5 text-[11px] bg-slate-800/80 text-slate-300"
+                  >
+                    العائلة {activePrevFamilyAr}
+                  </Chip>
+                </div>
+
+                <ButtonGroup fullWidth size="sm" variant="bordered">
+                  {PREVIOUS_CROPS.map((crop) => {
+                    const active = prevCropId === crop.id;
+                    return (
+                      <Button
+                        key={crop.id}
+                        aria-pressed={active}
+                        onPress={() => setPrevCropId(crop.id)}
+                        className={
+                          active
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/60 font-bold"
+                            : "bg-[#090f1b] text-slate-300 border-slate-800 hover:bg-slate-800/70"
+                        }
+                      >
+                        {crop.labelAr}
+                      </Button>
+                    );
+                  })}
+                </ButtonGroup>
+              </div>
+            </div>
 
             <FarmMap
               lat={instantData.coordinates.lat}
@@ -353,78 +420,94 @@ export default function OrbitAgriCockpitPage() {
               ndviValue={instantData.multiScale.modis.ndviValue}
               onSelectLocation={handleMapClick}
             />
+          </section>
+
+          {/* Step 2: اختبار ظروف المناخ + قراءات ناسا المبسطة */}
+          <section
+            aria-label="الخطوة الثانية: اختبار ظروف المناخ"
+            className="col-span-12 lg:col-span-5 hud-panel rounded-2xl p-4 lg:p-5 flex flex-col justify-between gap-4"
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="h-5 w-5 text-amber-400 shrink-0" />
+                  <h2 className="text-base font-bold text-slate-50">
+                    ٢. اختبار ظروف المناخ
+                  </h2>
+                </div>
+                <span className="text-xs text-slate-400">
+                  جرّب صدمات الحر والمياه
+                </span>
+              </div>
+
+              <StressSliders
+                prevCropId={prevCropId}
+                heatStressC={heatStressC}
+                waterDeficitPct={waterDeficitPct}
+                onHeatStressChange={setHeatStressC}
+                onWaterDeficitChange={setWaterDeficitPct}
+                showPrevCrop={false}
+              />
+            </div>
 
             <MultiScaleTabs telemetry={instantData.multiScale} />
           </section>
-
-          {/* Center Column: Pathway Comparison, Stress Simulator & 3x3 Field Grid */}
-          <section
-            aria-label="مقارنة المسارات ومحاكاة الصدمات"
-            className="col-span-12 lg:col-span-4 hud-panel rounded-xl p-3.5 flex flex-col gap-3.5"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4 text-amber-400" />
-                <h2 className="text-sm font-bold text-slate-100">
-                  مقارنة الدورات الزراعية واختبار الإجهاد
-                </h2>
-              </div>
-              <span className="text-[11px] text-slate-400">3 مواسم متتالية</span>
-            </div>
-
-            <StressSliders
-              prevCropId={prevCropId}
-              heatStressC={heatStressC}
-              waterDeficitPct={waterDeficitPct}
-              onPrevCropChange={setPrevCropId}
-              onHeatStressChange={setHeatStressC}
-              onWaterDeficitChange={setWaterDeficitPct}
-            />
-
-            <PathwayCards
-              pathways={instantData.pathways}
-              selectedPathwayId={selectedPathwayId}
-              onSelectPathway={setSelectedPathwayId}
-            />
-
-            <FieldGrid3x3 pathway={activePathway} />
-          </section>
-
-          {/* Left Column: Tradeoff Radar, P10/P50/P90 Uncertainty & AI Copilot */}
-          <section
-            aria-label="مخطط المفاضلات ونطاقات عدم اليقين والمستشار الذكي"
-            className="col-span-12 lg:col-span-4 hud-panel rounded-xl p-3.5 flex flex-col gap-3.5"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <LineChart className="h-4 w-4 text-emerald-400" />
-                <h2 className="text-sm font-bold text-slate-100">
-                  كشف المفاضلات وعدم اليقين والمستشار الذكي
-                </h2>
-              </div>
-              <span className="text-[11px] text-slate-400 tabular-telemetry">
-                2015–2024
-              </span>
-            </div>
-
-            <TradeoffRadar
-              selectedPathway={activePathway}
-              cashPathway={cashPathway}
-            />
-
-            <UncertaintyBands
-              selectedPathway={activePathway}
-              cashPathway={cashPathway}
-              annualRecords={instantData.annualRecords}
-            />
-
-            <AiCopilotCard
-              copilot={copilot}
-              loading={copilotLoading}
-              onRefresh={() => fetchCopilot(instantData)}
-            />
-          </section>
         </div>
+
+        {/* Step 3: قارن واختار مسارك (3 مواسم متتالية) */}
+        <section
+          aria-label="الخطوة الثالثة: قارن واختار مسارك"
+          className="hud-panel rounded-2xl p-4 lg:p-5 flex flex-col gap-4"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <GitCompareArrows className="h-5 w-5 text-sky-400 shrink-0" />
+              <h2 className="text-base font-bold text-slate-50">
+                ٣. قارن واختار مسارك (3 مواسم متتالية)
+              </h2>
+            </div>
+            <span className="text-xs text-slate-400">
+              اضغط على أي مسار لمقارنة المكاسب والمخاطر عبر 10 سنوات من بيانات ناسا
+            </span>
+          </div>
+
+          <PathwayCards
+            pathways={instantData.pathways}
+            selectedPathwayId={selectedPathwayId}
+            onSelectPathway={setSelectedPathwayId}
+          />
+
+          <div className="grid grid-cols-12 gap-4 items-start pt-1">
+            <div className="col-span-12 lg:col-span-5">
+              <TradeoffRadar
+                selectedPathway={activePathway}
+                cashPathway={cashPathway}
+              />
+            </div>
+
+            <div className="col-span-12 lg:col-span-7">
+              <UncertaintyBands
+                selectedPathway={activePathway}
+                cashPathway={cashPathway}
+                annualRecords={instantData.annualRecords}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-12 gap-4 items-start pt-1">
+            <div className="col-span-12 lg:col-span-6">
+              <AiCopilotCard
+                copilot={copilot}
+                loading={copilotLoading}
+                onRefresh={() => fetchCopilot(instantData)}
+              />
+            </div>
+
+            <div className="col-span-12 lg:col-span-6">
+              <FieldGrid3x3 pathway={activePathway} />
+            </div>
+          </div>
+        </section>
       </main>
 
       <RawJsonModal
@@ -443,4 +526,3 @@ export default function OrbitAgriCockpitPage() {
     </div>
   );
 }
-
