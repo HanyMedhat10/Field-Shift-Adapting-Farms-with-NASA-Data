@@ -1,0 +1,93 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    background-color: #070b12;
+    color: #e2e8f0;
+    font-family: var(--font-cairo), system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: rgba(16, 185, 129, 0.28);
+    color: #f8fafc;
+  }
+
+  input,
+  textarea {
+    caret-color: #34d399;
+  }
+
+  a,
+  [role="tab"],
+  button {
+    text-underline-offset: 4px;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b #070b12;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #070b12;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #1e293b;
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #334155;
+  }
+}
+
+.hud-panel {
+  background-color: #0d1421;
+  border: 1px solid #1e293b;
+  box-shadow: 0 12px 28px -12px rgba(2, 6, 23, 0.85);
+}
+
+.hud-subpanel {
+  background-color: #090f1b;
+  border: 1px solid #1e293b;
+}
+
+.tabular-telemetry {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ensure Leaflet map tiles and controls blend cleanly in the dark HUD */
+.leaflet-container {
+  background: #070b12;
+  font-family: var(--font-cairo), system-ui, sans-serif;
+  direction: ltr;
+}
+
+.leaflet-control-attribution {
+  background: rgba(7, 11, 18, 0.78) !important;
+  color: #94a3b8 !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #38bdf8 !important;
+}
+

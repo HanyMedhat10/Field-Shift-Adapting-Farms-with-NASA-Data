@@ -1,0 +1,169 @@
+"use client";
+
+import {
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Tooltip,
+} from "chart.js";
+import { PathwaySimulationResult } from "@/lib/simulationEngine";
+import { Radar } from "react-chartjs-2";
+
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
+
+interface TradeoffRadarProps {
+  selectedPathway: PathwaySimulationResult;
+  cashPathway: PathwaySimulationResult;
+}
+
+export function TradeoffRadar({
+  selectedPathway,
+  cashPathway,
+}: TradeoffRadarProps) {
+  const isCashSelected = selectedPathway.id === "cash";
+
+  const selectedFill =
+    selectedPathway.id === "resilient"
+      ? "rgba(56, 189, 248, 0.22)"
+      : selectedPathway.id === "cash"
+      ? "rgba(244, 63, 94, 0.22)"
+      : "rgba(16, 185, 129, 0.24)";
+
+  const selectedStroke =
+    selectedPathway.id === "resilient"
+      ? "#38bdf8"
+      : selectedPathway.id === "cash"
+      ? "#f43f5e"
+      : "#10b981";
+
+  const datasets = [
+    {
+      label: selectedPathway.titleAr,
+      data: [
+        selectedPathway.radar.cashReturn,
+        selectedPathway.radar.waterSaving,
+        selectedPathway.radar.nitrogenCharge,
+        selectedPathway.radar.heatResilience,
+        selectedPathway.radar.pestBreak,
+      ],
+      backgroundColor: selectedFill,
+      borderColor: selectedStroke,
+      borderWidth: 2,
+      pointBackgroundColor: selectedStroke,
+      pointBorderColor: "#070b12",
+      pointRadius: 3.5,
+    },
+  ];
+
+  if (!isCashSelected) {
+    datasets.push({
+      label: cashPathway.titleAr,
+      data: [
+        cashPathway.radar.cashReturn,
+        cashPathway.radar.waterSaving,
+        cashPathway.radar.nitrogenCharge,
+        cashPathway.radar.heatResilience,
+        cashPathway.radar.pestBreak,
+      ],
+      backgroundColor: "rgba(244, 63, 94, 0.14)",
+      borderColor: "#f43f5e",
+      borderWidth: 1.5,
+      pointBackgroundColor: "#f43f5e",
+      pointBorderColor: "#070b12",
+      pointRadius: 2.5,
+    });
+  }
+
+  const axisItems = [
+    { label: "العائد", value: selectedPathway.radar.cashReturn },
+    { label: "المياه", value: selectedPathway.radar.waterSaving },
+    { label: "النيتروجين", value: selectedPathway.radar.nitrogenCharge },
+    { label: "الحرارة", value: selectedPathway.radar.heatResilience },
+    { label: "الآفات", value: selectedPathway.radar.pestBreak },
+  ];
+
+  return (
+    <div className="hud-subpanel rounded-lg p-2.5 flex flex-col gap-2">
+      <div className="h-[215px] w-full">
+        <Radar
+          data={{
+            labels: [
+              "العائد النقدي",
+              "توفير المياه",
+              "شحن النيتروجين",
+              "صمود الحرارة",
+              "كسر الآفات",
+            ],
+            datasets,
+          }}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                min: 0,
+                max: 100,
+                ticks: {
+                  stepSize: 25,
+                  display: false,
+                },
+                grid: {
+                  color: "rgba(148, 163, 184, 0.16)",
+                },
+                angleLines: {
+                  color: "rgba(148, 163, 184, 0.18)",
+                },
+                pointLabels: {
+                  color: "#cbd5e1",
+                  font: {
+                    family: "Cairo, system-ui, sans-serif",
+                    size: 11,
+                    weight: 600,
+                  },
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  color: "#e2e8f0",
+                  boxWidth: 10,
+                  padding: 8,
+                  font: {
+                    family: "Cairo, system-ui, sans-serif",
+                    size: 11,
+                  },
+                },
+              },
+            },
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-5 gap-1 pt-1.5 border-t border-slate-800/80 text-center">
+        {axisItems.map((axis) => (
+          <div
+            key={axis.label}
+            className="rounded bg-[#0d1421] border border-slate-800/80 py-1 px-1"
+          >
+            <div className="text-[10px] text-slate-400 truncate">{axis.label}</div>
+            <div className="text-xs font-bold text-slate-100 tabular-telemetry">
+              {axis.value}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
