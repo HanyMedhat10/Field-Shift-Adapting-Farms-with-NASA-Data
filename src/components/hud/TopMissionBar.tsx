@@ -3,6 +3,7 @@
 import { useLanguage, useTheme } from "@/app/providers";
 import { Button, Chip } from "@heroui/react";
 import {
+  BookOpen,
   Database,
   Droplets,
   Globe,
@@ -14,6 +15,7 @@ import {
   Sun,
   ThermometerSun,
 } from "lucide-react";
+import Link from "next/link";
 
 interface TopMissionBarProps {
   governorateNameAr: string;
@@ -131,6 +133,20 @@ export function TopMissionBar({
                 : isAr
                 ? "الوضع الليلي"
                 : "Dark Mode"}
+            </Button>
+
+            <Button
+              as={Link}
+              href="/blog"
+              size="sm"
+              variant="bordered"
+              color="default"
+              startContent={
+                <BookOpen className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              }
+              className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-emerald-500/60 font-semibold"
+            >
+              {isAr ? "مدونة تحليل المناطق" : "Regional Data Blog"}
             </Button>
 
             <Button
