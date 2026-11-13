@@ -308,7 +308,7 @@ export default function OrbitAgriCockpitPage() {
   const activePrevFamilyAr = CROPS_MATRIX[prevCropId]?.familyAr ?? "";
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#070b12] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[var(--bg-ground)] text-[var(--text-main)] transition-colors duration-200">
       <TopMissionBar
         governorateNameAr={instantData.governorate.nameAr}
         coordinates={instantData.coordinates}
@@ -333,12 +333,12 @@ export default function OrbitAgriCockpitPage() {
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Compass className="h-5 w-5 text-emerald-400 shrink-0" />
-                <h1 className="text-base font-bold text-slate-50">
+                <Compass className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <h1 className="text-base font-bold text-slate-900 dark:text-slate-50">
                   ١. أرضك والمحصول السابق
                 </h1>
               </div>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-600 dark:text-slate-400">
                 تربة {instantData.governorate.soilTypeAr}
               </span>
             </div>
@@ -355,20 +355,23 @@ export default function OrbitAgriCockpitPage() {
                     handleSelectGovernorate(first);
                   }
                 }}
-                startContent={<MapPin className="h-4 w-4 text-emerald-400" />}
+                startContent={
+                  <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                }
                 classNames={{
-                  trigger: "bg-[#090f1b] border-slate-800 hover:border-slate-700",
-                  label: "text-slate-400 text-xs",
-                  value: "text-slate-100 font-semibold text-xs",
+                  trigger:
+                    "bg-slate-50 dark:bg-[#090f1b] border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700",
+                  label: "text-slate-600 dark:text-slate-400 text-xs",
+                  value: "text-slate-900 dark:text-slate-100 font-semibold text-xs",
                   popoverContent:
-                    "bg-[#0d1421] border border-slate-700 text-slate-100",
+                    "bg-white dark:bg-[#0d1421] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100",
                 }}
               >
                 {GOVERNORATES.map((gov) => (
                   <SelectItem key={gov.id} textValue={gov.nameAr}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-semibold">{gov.nameAr}</span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         {gov.regionAr}
                       </span>
                     </div>
@@ -377,15 +380,15 @@ export default function OrbitAgriCockpitPage() {
               </Select>
 
               <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between gap-2 text-xs text-slate-200">
+                <div className="flex items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
                   <span className="flex items-center gap-1.5 font-semibold">
-                    <Sprout className="h-3.5 w-3.5 text-emerald-400" />
+                    <Sprout className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                     المحصول السابق
                   </span>
                   <Chip
                     size="sm"
                     variant="flat"
-                    className="h-5 text-[11px] bg-slate-800/80 text-slate-300"
+                    className="h-5 text-[11px] bg-slate-200 text-slate-800 dark:bg-slate-800/80 dark:text-slate-300"
                   >
                     العائلة {activePrevFamilyAr}
                   </Chip>
@@ -401,8 +404,8 @@ export default function OrbitAgriCockpitPage() {
                         onPress={() => setPrevCropId(crop.id)}
                         className={
                           active
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/60 font-bold"
-                            : "bg-[#090f1b] text-slate-300 border-slate-800 hover:bg-slate-800/70"
+                            ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/60 font-bold"
+                            : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800/70"
                         }
                       >
                         {crop.labelAr}
@@ -430,12 +433,12 @@ export default function OrbitAgriCockpitPage() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-5 w-5 text-amber-400 shrink-0" />
-                  <h2 className="text-base font-bold text-slate-50">
+                  <SlidersHorizontal className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-50">
                     ٢. اختبار ظروف المناخ
                   </h2>
                 </div>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-600 dark:text-slate-400">
                   جرّب صدمات الحر والمياه
                 </span>
               </div>
@@ -461,12 +464,12 @@ export default function OrbitAgriCockpitPage() {
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <GitCompareArrows className="h-5 w-5 text-sky-400 shrink-0" />
-              <h2 className="text-base font-bold text-slate-50">
+              <GitCompareArrows className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-50">
                 ٣. قارن واختار مسارك (3 مواسم متتالية)
               </h2>
             </div>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-600 dark:text-slate-400">
               اضغط على أي مسار لمقارنة المكاسب والمخاطر عبر 10 سنوات من بيانات ناسا
             </span>
           </div>

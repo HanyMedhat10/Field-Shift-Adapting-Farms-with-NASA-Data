@@ -1,27 +1,58 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg-ground: #f1f5f9;
+  --bg-nav: rgba(255, 255, 255, 0.94);
+  --bg-panel: #ffffff;
+  --bg-subpanel: #f8fafc;
+  --bg-inset: #ffffff;
+  --border-panel: #cbd5e1;
+  --border-subpanel: #cbd5e1;
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #475569;
+  --panel-shadow: 0 10px 25px -10px rgba(15, 23, 42, 0.08);
+  --scrollbar-track: #e2e8f0;
+  --scrollbar-thumb: #94a3b8;
+}
+
+html.dark {
+  color-scheme: dark;
+  --bg-ground: #070b12;
+  --bg-nav: rgba(9, 15, 26, 0.95);
+  --bg-panel: #0d1421;
+  --bg-subpanel: #090f1b;
+  --bg-inset: #0d1421;
+  --border-panel: #1e293b;
+  --border-subpanel: #1e293b;
+  --text-main: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
+  --panel-shadow: 0 12px 28px -12px rgba(2, 6, 23, 0.85);
+  --scrollbar-track: #070b12;
+  --scrollbar-thumb: #1e293b;
+}
 
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
-
   html,
   body {
-    background-color: #070b12;
-    color: #e2e8f0;
+    background-color: var(--bg-ground);
+    color: var(--text-main);
     font-family: var(--font-cairo), system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
   }
 
   ::selection {
-    background-color: rgba(16, 185, 129, 0.28);
-    color: #f8fafc;
+    background-color: rgba(16, 185, 129, 0.25);
+    color: inherit;
   }
 
   input,
   textarea {
-    caret-color: #34d399;
+    caret-color: #10b981;
   }
 
   a,
@@ -37,7 +68,7 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #1e293b #070b12;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
   *::-webkit-scrollbar {
@@ -46,48 +77,48 @@
   }
 
   *::-webkit-scrollbar-track {
-    background: #070b12;
+    background: var(--scrollbar-track);
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: #1e293b;
+    background-color: var(--scrollbar-thumb);
     border-radius: 9999px;
-  }
-
-  *::-webkit-scrollbar-thumb:hover {
-    background-color: #334155;
   }
 }
 
 .hud-panel {
-  background-color: #0d1421;
-  border: 1px solid #1e293b;
-  box-shadow: 0 12px 28px -12px rgba(2, 6, 23, 0.85);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-panel);
+  box-shadow: var(--panel-shadow);
 }
 
 .hud-subpanel {
-  background-color: #090f1b;
-  border: 1px solid #1e293b;
+  background-color: var(--bg-subpanel);
+  border: 1px solid var(--border-subpanel);
+}
+
+.hud-inset {
+  background-color: var(--bg-inset);
+  border: 1px solid var(--border-panel);
 }
 
 .tabular-telemetry {
   font-variant-numeric: tabular-nums;
 }
 
-/* Ensure Leaflet map tiles and controls blend cleanly in the dark HUD */
+/* Ensure Leaflet map tiles and controls blend cleanly */
 .leaflet-container {
-  background: #070b12;
+  background: var(--bg-subpanel);
   font-family: var(--font-cairo), system-ui, sans-serif;
   direction: ltr;
 }
 
 .leaflet-control-attribution {
   background: rgba(7, 11, 18, 0.78) !important;
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
   font-size: 10px !important;
 }
 
 .leaflet-control-attribution a {
   color: #38bdf8 !important;
 }
-

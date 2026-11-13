@@ -71,8 +71,8 @@ export default function FarmMap({
   return (
     <div className="flex flex-col gap-2.5">
       <div className="hud-subpanel flex items-center justify-between gap-2 rounded-lg px-3 py-2">
-        <div className="flex items-center gap-2 text-xs text-slate-200">
-          <Layers className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200">
+          <Layers className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span className="font-medium">
             إظهار صحة الغطاء النباتي من قمر ناسا (MODIS NDVI)
           </span>
@@ -86,7 +86,7 @@ export default function FarmMap({
         />
       </div>
 
-      <div className="relative h-[250px] w-full overflow-hidden rounded-xl border border-slate-800 bg-[#05080f]">
+      <div className="relative h-[250px] w-full overflow-hidden rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-200 dark:bg-[#05080f]">
         <MapContainer
           center={[lat, lon]}
           zoom={12}

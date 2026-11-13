@@ -46,15 +46,15 @@ const DEMO_TIMELINE = [
   },
   {
     time: "00:15 – 00:30",
-    step: "اختيار الغربية والمحصول السابق (بطاطس)، ثم تفعيل سيناريو (ذروة الحر والجفاف +3.5°C / -35%).",
+    step: "اختيار الغربية والمحصول السابق (طماطم)، ثم تفعيل سيناريو (حر شديد ونقص ري +3.5°C / -35%).",
   },
   {
     time: "00:30 – 00:45",
-    step: "مقارنة انهيار المسار النقدي وتعارض العائلة الباذنجانية في شبكة 3×3 مقابل صمود المسار المتوازن.",
+    step: "مقارنة انهيار المسار النقدي وخصم الـ 18% لتكرار العائلة الباذنجانية مقابل صمود المسار المتوازن.",
   },
   {
     time: "00:45 – 01:00",
-    step: "قراءة نطاق P10/P50/P90 وملخص العامية المصرية وفتح نافذة فحص بيانات ناسا JSON لإثبات المصداقية.",
+    step: "قراءة نطاق P10/P50/P90 وملخص العامية المصرية وفتح نافذة عرض بيانات ناسا الخام JSON لإثبات المصداقية.",
   },
 ];
 
@@ -66,9 +66,9 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
       size="3xl"
       scrollBehavior="inside"
       classNames={{
-        base: "bg-[#0b1220] border border-slate-700 text-slate-100",
-        header: "border-b border-slate-800",
-        footer: "border-t border-slate-800",
+        base: "bg-white dark:bg-[#0b1220] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100",
+        header: "border-b border-slate-200 dark:border-slate-800",
+        footer: "border-t border-slate-200 dark:border-slate-800",
       }}
     >
       <ModalContent>
@@ -76,7 +76,7 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
           <>
             <ModalHeader className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Presentation className="h-5 w-5 text-emerald-400" />
+                <Presentation className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 <h2 className="text-lg font-bold">
                   عرض التحكيم (5 شرائح + ديمو 60 ثانية)
                 </h2>
@@ -93,7 +93,7 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
 
             <ModalBody className="py-4 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-sky-300">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-sky-700 dark:text-sky-300">
                   <Layers className="h-4 w-4" />
                   <span>هيكل العرض التقديمي (5 Slides)</span>
                 </div>
@@ -103,10 +103,10 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
                       key={slide.title}
                       className="hud-subpanel rounded-lg p-3 flex flex-col gap-1"
                     >
-                      <div className="text-xs font-bold text-emerald-300">
+                      <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
                         {slide.title}
                       </div>
-                      <p className="text-xs text-slate-300 leading-relaxed">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                         {slide.body}
                       </p>
                     </div>
@@ -115,7 +115,7 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
               </div>
 
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">
                   <Clock className="h-4 w-4" />
                   <span>سيناريو الديمو الحي أمام لجنة التحكيم (60 ثانية)</span>
                 </div>
@@ -125,13 +125,13 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
                       key={item.time}
                       className="hud-subpanel rounded-lg px-3 py-2 flex items-center justify-between gap-3 text-xs"
                     >
-                      <span className="text-slate-200 leading-relaxed">
+                      <span className="text-slate-800 dark:text-slate-200 leading-relaxed">
                         {item.step}
                       </span>
                       <Chip
                         size="sm"
                         variant="bordered"
-                        className="border-amber-500/40 text-amber-300 shrink-0 tabular-telemetry"
+                        className="border-amber-500/40 text-amber-700 dark:text-amber-300 shrink-0 tabular-telemetry"
                         dir="ltr"
                       >
                         {item.time}
@@ -153,4 +153,3 @@ export function PitchModal({ isOpen, onOpenChange }: PitchModalProps) {
     </Modal>
   );
 }
-

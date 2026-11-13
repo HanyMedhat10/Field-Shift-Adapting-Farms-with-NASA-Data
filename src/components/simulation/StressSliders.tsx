@@ -53,16 +53,16 @@ export function StressSliders({
     <div className="flex flex-col gap-3">
       {showPrevCrop && onPrevCropChange && (
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-2 text-xs text-slate-200">
+          <div className="flex items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
             <span className="flex items-center gap-1.5 font-semibold">
-              <Sprout className="h-3.5 w-3.5 text-emerald-400" />
+              <Sprout className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               ما هو المحصول المزروع حالياً أو سابقاً؟
             </span>
             <Chip
               size="sm"
               variant="flat"
               color="default"
-              className="h-5 text-[11px] bg-slate-800/80 text-slate-300"
+              className="h-5 text-[11px] bg-slate-200 text-slate-800 dark:bg-slate-800/80 dark:text-slate-300"
             >
               العائلة {activeFamilyAr}
             </Chip>
@@ -78,8 +78,8 @@ export function StressSliders({
                   onPress={() => onPrevCropChange(crop.id)}
                   className={
                     active
-                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/60 font-bold"
-                      : "bg-[#090f1b] text-slate-300 border-slate-800 hover:bg-slate-800/70"
+                      ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/60 font-bold"
+                      : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800/70"
                   }
                 >
                   {crop.labelAr}
@@ -91,8 +91,8 @@ export function StressSliders({
       )}
 
       <div className="hud-subpanel rounded-lg p-3.5 flex flex-col gap-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-800/80">
-          <span className="text-xs font-semibold text-slate-300">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800/80">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
             تجربة سريعة للظروف:
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -110,8 +110,8 @@ export function StressSliders({
                   }}
                   className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                     isPresetActive
-                      ? "bg-amber-500/20 text-amber-200 border-amber-400/60"
-                      : "bg-[#0d1421] text-slate-300 border-slate-800 hover:border-slate-600"
+                      ? "bg-amber-500/20 text-amber-800 border-amber-500/60 dark:text-amber-200 dark:border-amber-400/60"
+                      : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 dark:bg-[#0d1421] dark:text-slate-300 dark:border-slate-800 dark:hover:border-slate-600"
                   }`}
                 >
                   <Icon className="h-3 w-3 shrink-0" />
@@ -124,11 +124,11 @@ export function StressSliders({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1.5 font-semibold text-amber-300">
-              <Flame className="h-4 w-4 text-amber-400" />
+            <span className="flex items-center gap-1.5 font-semibold text-amber-700 dark:text-amber-300">
+              <Flame className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               موجة حر إضافية (+0°C إلى +4.5°C)
             </span>
-            <span className="font-bold text-amber-300 tabular-telemetry">
+            <span className="font-bold text-amber-700 dark:text-amber-300 tabular-telemetry">
               +{heatStressC.toFixed(1)} °C
             </span>
           </div>
@@ -148,11 +148,11 @@ export function StressSliders({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1.5 font-semibold text-rose-300">
-              <Droplet className="h-4 w-4 text-rose-400" />
+            <span className="flex items-center gap-1.5 font-semibold text-rose-700 dark:text-rose-300">
+              <Droplet className="h-4 w-4 text-rose-600 dark:text-rose-400" />
               نقص مياه الري (0% إلى -45%)
             </span>
-            <span className="font-bold text-rose-300 tabular-telemetry">
+            <span className="font-bold text-rose-700 dark:text-rose-300 tabular-telemetry">
               -{waterDeficitPct}%
             </span>
           </div>

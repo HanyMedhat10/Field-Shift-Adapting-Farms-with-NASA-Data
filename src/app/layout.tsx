@@ -23,11 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className={`dark ${cairo.variable}`}>
-      <body className="min-h-screen bg-[#070b12] text-slate-100 antialiased">
+    <html lang="ar" dir="rtl" className={`dark ${cairo.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen antialiased transition-colors duration-200">
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
-

@@ -50,9 +50,9 @@ export function RawJsonModal({
       size="3xl"
       scrollBehavior="inside"
       classNames={{
-        base: "bg-[#0b1220] border border-slate-700 text-slate-100",
-        header: "border-b border-slate-800",
-        footer: "border-t border-slate-800",
+        base: "bg-white dark:bg-[#0b1220] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100",
+        header: "border-b border-slate-200 dark:border-slate-800",
+        footer: "border-t border-slate-200 dark:border-slate-800",
       }}
     >
       <ModalContent>
@@ -61,7 +61,7 @@ export function RawJsonModal({
             <ModalHeader className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-sky-400" />
+                  <Database className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   <h2 className="text-lg font-bold">
                     مخرجات API ناسا الخام (NASA POWER & ASF Sentinel-1)
                   </h2>
@@ -75,14 +75,26 @@ export function RawJsonModal({
                   {sourceLabelAr}
                 </Chip>
               </div>
-              <div className="flex flex-wrap gap-2 text-xs font-normal text-slate-400">
-                <Chip size="sm" variant="bordered" className="border-slate-700">
+              <div className="flex flex-wrap gap-2 text-xs font-normal text-slate-600 dark:text-slate-400">
+                <Chip
+                  size="sm"
+                  variant="bordered"
+                  className="border-slate-300 dark:border-slate-700"
+                >
                   POWER API: {powerLive ? "حي (Live)" : "احتياطي محلي (Fallback)"}
                 </Chip>
-                <Chip size="sm" variant="bordered" className="border-slate-700">
+                <Chip
+                  size="sm"
+                  variant="bordered"
+                  className="border-slate-300 dark:border-slate-700"
+                >
                   ASF SAR: {asfLive ? "حي (Live)" : "احتياطي محلي (Fallback)"}
                 </Chip>
-                <Chip size="sm" variant="bordered" className="border-slate-700">
+                <Chip
+                  size="sm"
+                  variant="bordered"
+                  className="border-slate-300 dark:border-slate-700"
+                >
                   Cache: Next.js Revalidate 86400s
                 </Chip>
               </div>
@@ -91,7 +103,7 @@ export function RawJsonModal({
             <ModalBody className="py-4">
               <pre
                 dir="ltr"
-                className="rounded-lg bg-[#05080f] border border-slate-800 p-4 text-xs leading-relaxed text-emerald-300 overflow-x-auto max-h-[440px] font-mono"
+                className="rounded-lg bg-slate-950 border border-slate-800 p-4 text-xs leading-relaxed text-emerald-300 overflow-x-auto max-h-[440px] font-mono"
               >
                 {formatted}
               </pre>
@@ -104,7 +116,11 @@ export function RawJsonModal({
                 color="primary"
                 onPress={handleCopy}
                 startContent={
-                  copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />
+                  copied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )
                 }
               >
                 {copied ? "تم النسخ" : "نسخ JSON"}
@@ -119,4 +135,3 @@ export function RawJsonModal({
     </Modal>
   );
 }
-

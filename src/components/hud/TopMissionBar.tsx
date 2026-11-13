@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/app/providers";
 import {
   Button,
   Chip,
@@ -11,9 +12,11 @@ import {
   Database,
   Droplets,
   MapPin,
+  Moon,
   PackageCheck,
   Presentation,
   Satellite,
+  Sun,
   ThermometerSun,
 } from "lucide-react";
 
@@ -40,22 +43,25 @@ export function TopMissionBar({
   onOpenRawJson,
   onOpenPitchModal,
 }: TopMissionBarProps) {
+  const { isDark, toggleTheme } = useTheme();
+
   return (
     <Navbar
       maxWidth="full"
       isBordered
-      className="bg-[#090f1a]/95 border-slate-800/90 px-2 lg:px-6 h-auto py-2.5"
+      className="bg-[var(--bg-nav)] border-[var(--border-panel)] px-2 lg:px-6 h-auto py-2.5"
       classNames={{
-        wrapper: "px-2 gap-3 flex-wrap justify-between min-h-[56px] max-w-[1440px] mx-auto",
+        wrapper:
+          "px-2 gap-3 flex-wrap justify-between min-h-[56px] max-w-[1440px] mx-auto",
       }}
     >
       <NavbarBrand className="gap-3 grow-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 shrink-0">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 shrink-0">
           <Satellite className="h-5 w-5" />
         </div>
         <div className="flex flex-col leading-tight">
           <div className="flex items-center gap-2">
-            <span className="text-base font-extrabold tracking-tight text-slate-50">
+            <span className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
               ElMazra3a EL sa3ida — مستشار الدورة الزراعية
             </span>
             <Chip
@@ -67,9 +73,10 @@ export function TopMissionBar({
               {isLiveNasa ? "ناسا متصلة" : "بيانات دلتا النيل"}
             </Chip>
           </div>
-          <span className="flex items-center gap-1 text-xs text-slate-400 tabular-telemetry">
-            <MapPin className="h-3 w-3 text-emerald-400" />
-            {governorateNameAr} ({coordinates.lat.toFixed(2)}°N, {coordinates.lon.toFixed(2)}°E)
+          <span className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 tabular-telemetry">
+            <MapPin className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+            {governorateNameAr} ({coordinates.lat.toFixed(2)}°N,{" "}
+            {coordinates.lon.toFixed(2)}°E)
           </span>
         </div>
       </NavbarBrand>
@@ -81,7 +88,8 @@ export function TopMissionBar({
           startContent={<ThermometerSun className="h-3.5 w-3.5" />}
           className="font-semibold tabular-telemetry"
         >
-          تغيّر حرارة ناسا (10 سنوات): {thermalAnomalyC >= 0 ? `+${thermalAnomalyC}` : thermalAnomalyC}°C
+          تغيّر حرارة ناسا (10 سنوات):{" "}
+          {thermalAnomalyC >= 0 ? `+${thermalAnomalyC}` : thermalAnomalyC}°C
         </Chip>
 
         <Chip
@@ -108,9 +116,29 @@ export function TopMissionBar({
           size="sm"
           variant="bordered"
           color="default"
+          onPress={toggleTheme}
+          aria-label={isDark ? "التبديل إلى الوضع النهاري" : "التبديل إلى الوضع الليلي"}
+          startContent={
+            isDark ? (
+              <Sun className="h-3.5 w-3.5 text-amber-400" />
+            ) : (
+              <Moon className="h-3.5 w-3.5 text-slate-700" />
+            )
+          }
+          className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-amber-500/60 font-medium"
+        >
+          {isDark ? "الوضع النهاري" : "الوضع الليلي"}
+        </Button>
+
+        <Button
+          size="sm"
+          variant="bordered"
+          color="default"
           onPress={onOpenPitchModal}
-          startContent={<Presentation className="h-3.5 w-3.5 text-emerald-400" />}
-          className="border-slate-700 bg-slate-900/70 text-slate-100 hover:border-emerald-500/60 font-medium"
+          startContent={
+            <Presentation className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          }
+          className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-emerald-500/60 font-medium"
         >
           ملخص التحكيم
         </Button>
@@ -120,8 +148,10 @@ export function TopMissionBar({
           variant="bordered"
           color="default"
           onPress={onOpenRawJson}
-          startContent={<Database className="h-3.5 w-3.5 text-sky-400" />}
-          className="border-slate-700 bg-slate-900/70 text-slate-100 hover:border-sky-500/60 font-medium"
+          startContent={
+            <Database className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+          }
+          className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-sky-500/60 font-medium"
         >
           عرض بيانات ناسا الخام (JSON)
         </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/app/providers";
 import {
   Chart as ChartJS,
   Filler,
@@ -30,20 +31,21 @@ export function TradeoffRadar({
   selectedPathway,
   cashPathway,
 }: TradeoffRadarProps) {
+  const { isDark } = useTheme();
   const isCashSelected = selectedPathway.id === "cash";
 
   const selectedFill =
     selectedPathway.id === "resilient"
-      ? "rgba(56, 189, 248, 0.22)"
+      ? "rgba(14, 165, 233, 0.22)"
       : selectedPathway.id === "cash"
       ? "rgba(244, 63, 94, 0.22)"
       : "rgba(16, 185, 129, 0.24)";
 
   const selectedStroke =
     selectedPathway.id === "resilient"
-      ? "#38bdf8"
+      ? "#0284c7"
       : selectedPathway.id === "cash"
-      ? "#f43f5e"
+      ? "#e11d48"
       : "#10b981";
 
   const datasets = [
@@ -60,7 +62,7 @@ export function TradeoffRadar({
       borderColor: selectedStroke,
       borderWidth: 2,
       pointBackgroundColor: selectedStroke,
-      pointBorderColor: "#070b12",
+      pointBorderColor: isDark ? "#070b12" : "#ffffff",
       pointRadius: 3.5,
     },
   ];
@@ -79,7 +81,7 @@ export function TradeoffRadar({
       borderColor: "#f43f5e",
       borderWidth: 1.5,
       pointBackgroundColor: "#f43f5e",
-      pointBorderColor: "#070b12",
+      pointBorderColor: isDark ? "#070b12" : "#ffffff",
       pointRadius: 2.5,
     });
   }
@@ -94,7 +96,7 @@ export function TradeoffRadar({
 
   return (
     <div className="hud-subpanel rounded-lg p-3 flex flex-col gap-2.5">
-      <div className="text-xs font-bold text-slate-200">
+      <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
         مقارنة المكاسب والتضحيات (أمام المسار النقدي)
       </div>
 
@@ -122,13 +124,17 @@ export function TradeoffRadar({
                   display: false,
                 },
                 grid: {
-                  color: "rgba(148, 163, 184, 0.16)",
+                  color: isDark
+                    ? "rgba(148, 163, 184, 0.16)"
+                    : "rgba(15, 23, 42, 0.12)",
                 },
                 angleLines: {
-                  color: "rgba(148, 163, 184, 0.18)",
+                  color: isDark
+                    ? "rgba(148, 163, 184, 0.18)"
+                    : "rgba(15, 23, 42, 0.14)",
                 },
                 pointLabels: {
-                  color: "#cbd5e1",
+                  color: isDark ? "#cbd5e1" : "#1e293b",
                   font: {
                     family: "Cairo, system-ui, sans-serif",
                     size: 11,
@@ -141,7 +147,7 @@ export function TradeoffRadar({
               legend: {
                 position: "bottom",
                 labels: {
-                  color: "#e2e8f0",
+                  color: isDark ? "#e2e8f0" : "#0f172a",
                   boxWidth: 10,
                   padding: 8,
                   font: {
@@ -155,14 +161,13 @@ export function TradeoffRadar({
         />
       </div>
 
-      <div className="grid grid-cols-5 gap-1.5 pt-2 border-t border-slate-800/80 text-center">
+      <div className="grid grid-cols-5 gap-1.5 pt-2 border-t border-slate-200 dark:border-slate-800/80 text-center">
         {axisItems.map((axis) => (
-          <div
-            key={axis.label}
-            className="rounded-md bg-[#0d1421] border border-slate-800/80 py-1.5 px-1"
-          >
-            <div className="text-[10px] text-slate-400 truncate">{axis.label}</div>
-            <div className="text-xs font-bold text-slate-100 tabular-telemetry">
+          <div key={axis.label} className="hud-inset rounded-md py-1.5 px-1">
+            <div className="text-[10px] text-slate-600 dark:text-slate-400 truncate">
+              {axis.label}
+            </div>
+            <div className="text-xs font-bold text-slate-900 dark:text-slate-100 tabular-telemetry">
               {axis.value}/100
             </div>
           </div>
