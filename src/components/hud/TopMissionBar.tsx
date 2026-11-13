@@ -56,7 +56,7 @@ export function TopMissionBar({
         <div className="flex flex-col leading-tight">
           <div className="flex items-center gap-2">
             <span className="text-base font-extrabold tracking-tight text-slate-50">
-              OrbitAgri — مستشار الدورة الزراعية
+              ElMazra3a EL sa3ida — مستشار الدورة الزراعية
             </span>
             <Chip
               size="sm"

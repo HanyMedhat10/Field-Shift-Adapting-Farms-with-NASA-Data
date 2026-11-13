@@ -17,11 +17,11 @@ delegated: Next.js 16.4+ (App Router + TypeScript), `@heroui/react@2.8.10` + Tai
 
 ## Product Purpose
 
-OrbitAgri is a single-screen agronomic decision cockpit ("Field Shift: Adapting Farms with NASA Data") that transforms multi-scale NASA Earth observations (`NASA POWER`, `MODIS NDVI`, `SMAP GWETROOT`, and `ASF Sentinel-1 SAR`) into 3-season crop rotation pathways, statistical yield-profit uncertainty bands (`P10 / P50 / P90`), and plain Egyptian Arabic agricultural advice.
+ElMazra3a EL sa3ida is a single-screen agronomic decision cockpit ("Field Shift: Adapting Farms with NASA Data") that transforms multi-scale NASA Earth observations (`NASA POWER`, `MODIS NDVI`, `SMAP GWETROOT`, and `ASF Sentinel-1 SAR`) into 3-season crop rotation pathways, statistical yield-profit uncertainty bands (`P10 / P50 / P90`), and plain Egyptian Arabic agricultural advice.
 
 ## Positioning
 
-Instead of recommending a single static crop, OrbitAgri unifies 4 spatial observation scales on one screen, compares 3 consecutive 3-season rotation pathways head-to-head under simulated heat waves (`+0°C` to `+4.5°C`) and water deficits (`0%` to `-45%`), exposes hidden tradeoffs (urea fertilizer sacks, irrigation water savings, nitrogen balance, pest-break capability), and quantifies 10-year climate uncertainty (`P10 / P50 / P90` & `CV%`) with a resilient offline NASA fallback.
+Instead of recommending a single static crop, ElMazra3a EL sa3ida unifies 4 spatial observation scales on one screen, compares 3 consecutive 3-season rotation pathways head-to-head under simulated heat waves (`+0°C` to `+4.5°C`) and water deficits (`0%` to `-45%`), exposes hidden tradeoffs (urea fertilizer sacks, irrigation water savings, nitrogen balance, pest-break capability), and quantifies 10-year climate uncertainty (`P10 / P50 / P90` & `CV%`) with a resilient offline NASA fallback.
 
 ## Operating Context
 
@@ -37,7 +37,7 @@ Instead of recommending a single static crop, OrbitAgri unifies 4 spatial observ
 
 ## Brand Commitments
 
-- Name: **OrbitAgri — Field Shift: Adapting Farms with NASA Data**
+- Name: **ElMazra3a EL sa3ida — Field Shift: Adapting Farms with NASA Data**
 - Visual commitment: Dark Mission Control HUD using HeroUI v2 dark theme and 12-column responsive single-screen layout (`grid-cols-12`) in Arabic RTL.
 
 ## Evidence on Hand

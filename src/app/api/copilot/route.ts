@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const prompt = `أنت مستشار زراعي مصري خبير في تحليل بيانات أقمار ناسا الصناعية (NASA POWER, MODIS NDVI, SMAP, ASF Sentinel-1) لمشروع OrbitAgri.
+    const prompt = `أنت مستشار زراعي مصري خبير في تحليل بيانات أقمار ناسا الصناعية (NASA POWER, MODIS NDVI, SMAP, ASF Sentinel-1) لمشروع ElMazra3a EL sa3ida.
 اكتب نصيحة عملية وواضحة للمزارع المصري بالعامية المصرية المهذبة والمبسطة، وبناءً على الأرقام التالية فقط دون اختراع أرقام:
 - المحافظة: ${body.governorateNameAr ?? "الغربية"}
 - المحصول السابق: ${body.prevCropNameAr ?? "قمح"}

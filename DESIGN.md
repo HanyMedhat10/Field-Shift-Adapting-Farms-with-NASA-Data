@@ -1,4 +1,4 @@
-# Design System — OrbitAgri
+# Design System — ElMazra3a EL sa3ida
 
 ## Visual Direction
 
@@ -28,7 +28,7 @@
 
 ## Layout & Grid
 
-- **Top Mission Bar (`TopMissionBar`):** HeroUI `Navbar` containing OrbitAgri identity, live coordinate telemetry, Soil Health `Progress` bar, Urea & Water savings `Chip`s, and the `RawJsonModal` trigger.
+- **Top Mission Bar (`TopMissionBar`):** HeroUI `Navbar` containing ElMazra3a EL sa3ida identity, live coordinate telemetry, Soil Health `Progress` bar, Urea & Water savings `Chip`s, and the `RawJsonModal` trigger.
 - **3-Column Cockpit (`grid-cols-12 gap-3.5`):**
   1. **Right Column (`col-span-12 lg:col-span-4`):** Governorate `Select`, interactive Leaflet satellite + NASA GIBS MODIS NDVI map (`FarmMap`), and 4-scale `MultiScaleTabs`.
   2. **Center Column (`col-span-12 lg:col-span-4`):** Previous Crop `ButtonGroup`, Heat/Water `StressSliders`, 3 clickable `PathwayCards`, and interactive 3×3 `FieldGrid3x3`.

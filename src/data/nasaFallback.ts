@@ -233,7 +233,7 @@ export function buildRawNasaPayload(params: {
 
   return {
     metadata: {
-      project: "OrbitAgri — NASA Space Apps 2026 (Field Shift)",
+      project: "ElMazra3a EL sa3ida — NASA Space Apps 2026 (Field Shift)",
       governorate: `${gov.nameAr} (${gov.nameEn})`,
       coordinates: { lat: Number(lat.toFixed(4)), lon: Number(lon.toFixed(4)) },
       cachePolicy: "Next.js Data Cache (revalidate: 86400s, timeout: 6000ms)",

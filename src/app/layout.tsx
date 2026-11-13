@@ -12,7 +12,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "OrbitAgri — Field Shift | NASA Space Apps 2026",
+  title: "ElMazra3a EL sa3ida — Field Shift | NASA Space Apps 2026",
   description:
     "منصة قرار زراعي موحدة تربط بيانات وكالة ناسا متعددة المقاييس لمقارنة الدورات الزراعية وكشف المفاضلات ونطاقات عدم اليقين P10/P50/P90.",
 };

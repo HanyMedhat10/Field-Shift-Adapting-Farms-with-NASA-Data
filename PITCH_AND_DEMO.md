@@ -1,4 +1,4 @@
-# OrbitAgri — Pitch Deck & 60-Second Demo Script (NASA Space Apps 2026)
+# ElMazra3a EL sa3ida — Pitch Deck & 60-Second Demo Script (NASA Space Apps 2026)
 
 ## 5-Slide Pitch Deck Structure
 
@@ -7,7 +7,7 @@
 - **Core Truth:** المزارعون يتلقون نصائح بزراعة محصول واحد مربح دون رؤية أثره على استنزاف التربة، تكرار العائلة النباتية، أو تقلب المناخ خلال المواسم الثلاثة القادمة.
 - **Impact:** زيادة استهلاك اليوريا، إهدار مياه الري، وخسائر حادة عند تزامن موجة حر (+2°C إلى +4.5°C) مع نقص المناوبة المائية.
 
-### Slide 2: الحل (OrbitAgri — Field Shift Cockpit)
+### Slide 2: الحل (ElMazra3a EL sa3ida — Field Shift Cockpit)
 - **Title:** منصة قرار زراعي موحدة على شاشة واحدة (Mission Control HUD)
 - **Four NASA Challenge Pillars:**
   1. **Multi-Scale Observations:** دمج `NASA POWER` (10 سنوات مناخ)، `MODIS Terra NDVI` (الغلاف النباتي)، `SMAP GWETROOT` (رطوبة الجذور)، و`ASF Sentinel-1 C-SAR` (رادار يخترق السحب).
@@ -34,7 +34,7 @@
 ## 60-Second Live Demo Script (لجنة التحكيم)
 
 - **[00:00 - 00:12] Opening & Map Multi-Scale:**
-  "أهلاً بكم في **OrbitAgri**. دي شاشة تحكم واحدة بتربط 4 مقاييس رصد من وكالة ناسا: مناخ 10 سنين من `NASA POWER`، الغطاء النباتي الحقيقي عبر `NASA GIBS MODIS NDVI` على الخريطة، رطوبة الجذور `SMAP`، ورادار `Sentinel-1` اللي بيخترق السحب."
+  "أهلاً بكم في **ElMazra3a EL sa3ida**. دي شاشة تحكم واحدة بتربط 4 مقاييس رصد من وكالة ناسا: مناخ 10 سنين من `NASA POWER`، الغطاء النباتي الحقيقي عبر `NASA GIBS MODIS NDVI` على الخريطة، رطوبة الجذور `SMAP`، ورادار `Sentinel-1` اللي بيخترق السحب."
 - **[00:12 - 00:25] Location & Stress Test:**
   "نختار محافظة الغربية أو نضغط على أي حقل في الخريطة، ونختار المحصول السابق (بطاطس). دلوقتي هنختبر صدمة مناخية: موجة حر `+3.0°C` وعجز مياه `-30%`."
 - **[00:25 - 00:40] Compare Rotations & Tradeoffs:**
