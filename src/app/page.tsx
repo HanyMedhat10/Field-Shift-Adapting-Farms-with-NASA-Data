@@ -382,19 +382,33 @@ export default function OrbitAgriCockpitPage() {
               ? "اختيار النطاق الجغرافي (مصر أو أمريكا)"
               : "Global Region Switch (Egypt or USA)"
           }
-          className="hud-panel rounded-2xl p-3.5 lg:px-5 flex flex-wrap items-center justify-between gap-3"
+          className="hud-panel rounded-2xl p-4 lg:px-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5"
         >
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Country Switch">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:flex items-center gap-2 w-full lg:w-auto"
+            role="group"
+            aria-label="Country Switch"
+          >
             <button
               type="button"
               aria-pressed={activeCountry === "EG"}
               onClick={() => handleSwitchCountry("EG")}
-              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors ${
+              className={`inline-flex items-center justify-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors ${
                 activeCountry === "EG"
                   ? "bg-emerald-500/20 text-emerald-800 border-emerald-500/70 dark:text-emerald-200 dark:border-emerald-400"
                   : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
               }`}
             >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 16"
+                className="h-3.5 w-5 rounded-[2px] border border-black/15 shrink-0"
+              >
+                <rect width="24" height="5.33" y="0" fill="#ce1126" />
+                <rect width="24" height="5.34" y="5.33" fill="#ffffff" />
+                <rect width="24" height="5.33" y="10.67" fill="#000000" />
+                <circle cx="12" cy="8" r="1.4" fill="#c09300" />
+              </svg>
               <span>🇪🇬 مصر (النيل والدلتا)</span>
             </button>
 
@@ -402,12 +416,24 @@ export default function OrbitAgriCockpitPage() {
               type="button"
               aria-pressed={activeCountry === "US"}
               onClick={() => handleSwitchCountry("US")}
-              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors ${
+              className={`inline-flex items-center justify-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors ${
                 activeCountry === "US"
                   ? "bg-sky-500/20 text-sky-800 border-sky-500/70 dark:text-sky-200 dark:border-sky-400"
                   : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
               }`}
             >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 16"
+                className="h-3.5 w-5 rounded-[2px] border border-black/15 shrink-0"
+              >
+                <rect width="24" height="16" fill="#ffffff" />
+                <rect width="24" height="2" y="0" fill="#b22234" />
+                <rect width="24" height="2" y="4" fill="#b22234" />
+                <rect width="24" height="2" y="8" fill="#b22234" />
+                <rect width="24" height="2" y="12" fill="#b22234" />
+                <rect width="10" height="8" x="0" y="0" fill="#3c3b6e" />
+              </svg>
               <span>🇺🇸 USA (California & Corn Belt)</span>
             </button>
           </div>
@@ -479,37 +505,56 @@ export default function OrbitAgriCockpitPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-end">
-              <Select
-                label={
-                  activeCountry === "US"
-                    ? isAr
-                      ? "اختر الإقليم الأمريكي (أو اضغط على الخريطة)"
-                      : "Select US Agricultural Region (or click map)"
-                    : isAr
-                    ? "اختر المحافظة المصرية (أو اضغط على الخريطة)"
-                    : "Select Egyptian Governorate (or click map)"
-                }
-                size="sm"
-                variant="bordered"
-                selectedKeys={[govId]}
-                onSelectionChange={(keys) => {
-                  const first = Array.from(keys)[0];
-                  if (typeof first === "string") {
-                    handleSelectGovernorate(first);
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    <MapPin className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    {activeCountry === "US"
+                      ? isAr
+                        ? "الإقليم الأمريكي (أو اضغط الخريطة)"
+                        : "US Region (or click map)"
+                      : isAr
+                      ? "المحافظة المصرية (أو اضغط الخريطة)"
+                      : "Egyptian Governorate (or click map)"}
+                  </span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[140px]">
+                    {isAr
+                      ? instantData.governorate.regionAr
+                      : instantData.governorate.regionEn}
+                  </span>
+                </div>
+
+                <Select
+                  aria-label={
+                    activeCountry === "US"
+                      ? isAr
+                        ? "اختر الإقليم الأمريكي"
+                        : "Select US Agricultural Region"
+                      : isAr
+                      ? "اختر المحافظة المصرية"
+                      : "Select Egyptian Governorate"
                   }
-                }}
-                startContent={
-                  <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                }
-                classNames={{
-                  trigger:
-                    "bg-slate-50 dark:bg-[#090f1b] border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700",
-                  label: "text-slate-600 dark:text-slate-400 text-xs",
-                  value: "text-slate-900 dark:text-slate-100 font-semibold text-xs",
-                  popoverContent:
-                    "bg-white dark:bg-[#0d1421] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100",
-                }}
-              >
+                  size="sm"
+                  variant="bordered"
+                  selectedKeys={[govId]}
+                  onSelectionChange={(keys) => {
+                    const first = Array.from(keys)[0];
+                    if (typeof first === "string") {
+                      handleSelectGovernorate(first);
+                    }
+                  }}
+                  startContent={
+                    <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  }
+                  classNames={{
+                    trigger:
+                      "h-8 min-h-8 bg-slate-50 dark:bg-[#090f1b] border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700",
+                    value:
+                      "text-slate-900 dark:text-slate-100 font-semibold text-xs",
+                    popoverContent:
+                      "bg-white dark:bg-[#0d1421] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100",
+                  }}
+                >
                 {countryGovernorates.map((gov) => (
                   <SelectItem
                     key={gov.id}
@@ -526,6 +571,7 @@ export default function OrbitAgriCockpitPage() {
                   </SelectItem>
                 ))}
               </Select>
+              </div>
 
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
