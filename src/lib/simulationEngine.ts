@@ -1,3 +1,4 @@
+import { formatProfitShort, formatProfitWithUnit } from "@/lib/currency";
 import {
   CROPS_MATRIX,
   CropInfo,
@@ -427,12 +428,15 @@ export function runFieldShiftSimulation(
       waterDeficitPct
     );
 
-    const p10Txt = p10Egp.toLocaleString("en-US");
-    const p50Txt = p50Egp.toLocaleString("en-US");
+    const p10TxtAr = formatProfitWithUnit(p10Egp, gov.country, true);
+    const p50ShortAr = formatProfitShort(p50Egp, gov.country, true);
+    const p10TxtEn = formatProfitWithUnit(p10Egp, gov.country, false);
+    const p50ShortEn = formatProfitShort(p50Egp, gov.country, false);
+
     const plainSummaryLinesAr: [string, string, string] =
       pid === "cash"
         ? [
-            `في أسوأ سنة مناخية ينزل دخلك إلى ${p10Txt} ج/فدان (مقابل متوسط ${p50Txt} ج) بسبب حساسية المحاصيل للحر والعطش.`,
+            `في أسوأ سنة مناخية ينزل دخلك إلى ${p10TxtAr} (مقابل متوسط ${p50ShortAr}) بسبب حساسية المحاصيل للحر والعطش.`,
             `هذا المسار يستهلك ${Math.abs(netUreaBags)} شكارة سماد يوريا 46% إضافية ويسحب كمية أكبر من مياه الري.`,
             raw.hasConflict
               ? `يقع في تكرار العائلة النباتية بعد ${prevCrop.nameAr} مما يخصم 18% من الإنتاج بسبب الآفات والنيماتودا.`
@@ -440,12 +444,12 @@ export function runFieldShiftSimulation(
           ]
         : pid === "resilient"
         ? [
-            `يحمي جيبك في أسوأ سنة مناخية بحد أدنى ${p10Txt} ج/فدان وبمتوسط ${p50Txt} ج حتى مع زيادة الحرارة (+${heatStressC}°C).`,
+            `يحمي جيبك في أسوأ سنة مناخية بحد أدنى ${p10TxtAr} وبمتوسط ${p50ShortAr} حتى مع زيادة الحرارة (+${heatStressC}°C).`,
             `يوفر ${waterSavedPct}% من مياه الري ويوفر ${ureaSacksSaved} شكارة سماد يوريا مقارنة بالمسار النقدي بفضل الجذور العميقة.`,
             `ينوّع العائلات النباتية بعد ${prevCrop.nameAr} تماماً ليمنع خصم الآفات (-18%) ويحافظ على رطوبة التربة.`,
           ]
         : [
-            `يحافظ على دخل متوازن يصل في أسوأ سنة إلى ${p10Txt} ج/فدان وبمتوسط متوقع ${p50Txt} ج عبر 3 مواسم متكاملة.`,
+            `يحافظ على دخل متوازن يصل في أسوأ سنة إلى ${p10TxtAr} وبمتوسط متوقع ${p50ShortAr} عبر 3 مواسم متكاملة.`,
             `يزرع البقوليات لتثبيت النيتروجين مما يوفر لك ${ureaSacksSaved} شكارة سماد يوريا 46% ويخفض مياه الري بنسبة ${waterSavedPct}%.`,
             `يكسر دورة الآفات بعد ${prevCrop.nameAr} بدون أي تكرار للعائلة النباتية، فيحمي أرضك من خصم الـ 18% ومن إجهاد السماد.`,
           ];
@@ -453,7 +457,7 @@ export function runFieldShiftSimulation(
     const plainSummaryLinesEn: [string, string, string] =
       pid === "cash"
         ? [
-            `In the worst climate year, income drops to ${p10Txt} EGP/feddan (vs. ${p50Txt} EGP median) due to heat and drought sensitivity.`,
+            `In the worst climate year, income drops to ${p10TxtEn} (vs. ${p50ShortEn} median) due to heat and drought sensitivity.`,
             `This sequence consumes ${Math.abs(netUreaBags)} extra 46% urea sacks and demands heavy irrigation volumes.`,
             raw.hasConflict
               ? `Repeats the same botanical family after ${prevCrop.nameEn}, triggering an 18% pest and nematode penalty.`
@@ -461,12 +465,12 @@ export function runFieldShiftSimulation(
           ]
         : pid === "resilient"
         ? [
-            `Protects your downside in the worst climate year at ${p10Txt} EGP/feddan (${p50Txt} EGP median) even under +${heatStressC}°C heat.`,
+            `Protects your downside in the worst climate year at ${p10TxtEn} (${p50ShortEn} median) even under +${heatStressC}°C heat.`,
             `Saves ${waterSavedPct}% irrigation water and ${ureaSacksSaved} urea sacks compared to the Cash track via deep roots.`,
             `Diversifies botanical families after ${prevCrop.nameEn}, eliminating the -18% pest penalty while preserving root moisture.`,
           ]
         : [
-            `Delivers balanced stability with ${p10Txt} EGP/feddan worst-year floor and ${p50Txt} EGP expected median across 3 seasons.`,
+            `Delivers balanced stability with ${p10TxtEn} worst-year floor and ${p50ShortEn} expected median across 3 seasons.`,
             `Integrates legumes to fix nitrogen, saving ${ureaSacksSaved} sacks of 46% urea and reducing irrigation demand by ${waterSavedPct}%.`,
             `Breaks pest cycles after ${prevCrop.nameEn} with zero family overlap, avoiding the 18% yield penalty and fertilizer strain.`,
           ];

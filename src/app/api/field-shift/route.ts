@@ -298,10 +298,14 @@ async function handleFieldShift(params: {
       modeLabelAr:
         powerLive || asfLive
           ? "متصل ببيانات ناسا الحية"
+          : matchedGov.country === "US"
+          ? "بيانات الحزام الزراعي الأمريكي المحفوظة (Offline Fallback)"
           : "بيانات دلتا النيل المحفوظة (Offline Fallback)",
       modeLabelEn:
         powerLive || asfLive
           ? "Connected to Live NASA Data"
+          : matchedGov.country === "US"
+          ? "Cached US Climate Baseline (Offline Fallback)"
           : "Cached Nile Delta Climate Baseline (Offline Fallback)",
     },
     rawJson,

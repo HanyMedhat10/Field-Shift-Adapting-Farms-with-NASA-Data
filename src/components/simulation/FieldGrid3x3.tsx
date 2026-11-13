@@ -3,15 +3,17 @@
 import { useLanguage } from "@/app/providers";
 import { Chip } from "@heroui/react";
 import { motion } from "framer-motion";
+import { CountryCode } from "@/lib/currency";
 import { FieldPlotCell, PathwaySimulationResult } from "@/lib/simulationEngine";
 import { AlertOctagon, Grid3x3, Sprout } from "lucide-react";
 import { useState } from "react";
 
 interface FieldGrid3x3Props {
   pathway: PathwaySimulationResult;
+  country?: CountryCode;
 }
 
-export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
+export function FieldGrid3x3({ pathway, country = "EG" }: FieldGrid3x3Props) {
   const { isAr } = useLanguage();
   const [seasonView, setSeasonView] = useState<1 | 2 | 3>(1);
   const [activePlotIdx, setActivePlotIdx] = useState<number>(0);
@@ -34,7 +36,11 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
           <Grid3x3 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <span>
-            {isAr
+            {country === "US"
+              ? isAr
+                ? "شبكة الحقل التفاعلية (1 إيكر / Acre = 9 أحواض)"
+                : "Interactive Field Grid (1 Acre = 9 Plots)"
+              : isAr
               ? "شبكة الحقل التفاعلية (1 فدان = 9 أحواض)"
               : "Interactive Field Grid (1 Feddan = 9 Plots)"}
           </span>

@@ -24,12 +24,17 @@ import {
   PREVIOUS_CROPS,
   PreviousCropId,
 } from "@/data/cropsMatrix";
-import { findNearestGovernorate, GOVERNORATES } from "@/data/governorates";
+import {
+  FEATURED_PRESET_IDS,
+  findNearestGovernorate,
+  GOVERNORATES,
+} from "@/data/governorates";
 import {
   buildRawNasaPayload,
   getFallbackAnnualClimate,
   getFallbackMultiScale,
 } from "@/data/nasaFallback";
+import { CountryCode, formatProfitWithUnit } from "@/lib/currency";
 import { PathwayId, runFieldShiftSimulation } from "@/lib/simulationEngine";
 import { CopilotApiResponse, FieldShiftApiResponse } from "@/types/fieldShift";
 import {
@@ -179,6 +184,7 @@ export default function OrbitAgriCockpitPage() {
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
           body: JSON.stringify({
+            country: simState.governorate.country,
             governorateNameAr: simState.governorate.nameAr,
             governorateNameEn: simState.governorate.nameEn,
             prevCropNameAr: prevCrop.nameAr,
@@ -219,16 +225,22 @@ export default function OrbitAgriCockpitPage() {
         setCopilot(json);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
+          const p50Ar = formatProfitWithUnit(
+            selected.p50Egp,
+            simState.governorate.country,
+            true
+          );
+          const p50En = formatProfitWithUnit(
+            selected.p50Egp,
+            simState.governorate.country,
+            false
+          );
           setCopilot({
             mode: "offline-agronomic-advisor",
             headlineAr: `ملخص القرار في ${simState.governorate.nameAr}`,
             headlineEn: `Decision Summary for ${simState.governorate.nameEn}`,
-            adviceAr: `المسار المختار (${selected.titleAr}) بيحقق متوسط ربح ${selected.p50Egp.toLocaleString(
-              "en-US"
-            )} جنيه/فدان مع توفير ${selected.ureaSacksSaved} شكارة يوريا و${selected.waterSavedPct}% من مياه الري.`,
-            adviceEn: `The selected ${selected.titleEn} yields a median profit of ${selected.p50Egp.toLocaleString(
-              "en-US"
-            )} EGP/feddan while saving ${selected.ureaSacksSaved} urea sacks and ${selected.waterSavedPct}% irrigation water.`,
+            adviceAr: `المسار المختار (${selected.titleAr}) بيحقق متوسط ربح ${p50Ar} مع توفير ${selected.ureaSacksSaved} شكارة يوريا و${selected.waterSavedPct}% من مياه الري.`,
+            adviceEn: `The selected ${selected.titleEn} yields a median profit of ${p50En} while saving ${selected.ureaSacksSaved} urea sacks and ${selected.waterSavedPct}% irrigation water.`,
             actionChecklistAr: [
               `حافظ على تنويع العائلة النباتية بعد ${prevCrop.nameAr}.`,
               `استعد لموجة حر +${simState.heatStressC}°C بمتابعة رطوبة التربة من قمر ناسا (SMAP).`,
@@ -319,6 +331,25 @@ export default function OrbitAgriCockpitPage() {
     setCoords({ lat, lon });
   };
 
+  const activeCountry: CountryCode = instantData.governorate.country;
+  const countryGovernorates = useMemo(
+    () => GOVERNORATES.filter((g) => g.country === activeCountry),
+    [activeCountry]
+  );
+  const featuredPresets = useMemo(
+    () =>
+      FEATURED_PRESET_IDS[activeCountry]
+        .map((id) => GOVERNORATES.find((g) => g.id === id))
+        .filter((g): g is (typeof GOVERNORATES)[number] => Boolean(g)),
+    [activeCountry]
+  );
+
+  const handleSwitchCountry = (country: CountryCode) => {
+    if (country === activeCountry) return;
+    const defaultId = country === "US" ? "us_california" : "gharbia";
+    handleSelectGovernorate(defaultId);
+  };
+
   const activePathway = instantData.pathways[selectedPathwayId];
   const cashPathway = instantData.pathways.cash;
   const activePrevCrop = CROPS_MATRIX[prevCropId];
@@ -344,6 +375,82 @@ export default function OrbitAgriCockpitPage() {
       />
 
       <main className="mx-auto w-full max-w-[1440px] flex-1 p-4 lg:p-6 flex flex-col gap-5">
+        {/* Global Dual-Region Switch Bar (Egypt & USA) */}
+        <section
+          aria-label={
+            isAr
+              ? "اختيار النطاق الجغرافي (مصر أو أمريكا)"
+              : "Global Region Switch (Egypt or USA)"
+          }
+          className="hud-panel rounded-2xl p-3.5 lg:px-5 flex flex-wrap items-center justify-between gap-3"
+        >
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Country Switch">
+            <button
+              type="button"
+              aria-pressed={activeCountry === "EG"}
+              onClick={() => handleSwitchCountry("EG")}
+              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors ${
+                activeCountry === "EG"
+                  ? "bg-emerald-500/20 text-emerald-800 border-emerald-500/70 dark:text-emerald-200 dark:border-emerald-400"
+                  : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+              }`}
+            >
+              <span>🇪🇬 مصر (النيل والدلتا)</span>
+            </button>
+
+            <button
+              type="button"
+              aria-pressed={activeCountry === "US"}
+              onClick={() => handleSwitchCountry("US")}
+              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors ${
+                activeCountry === "US"
+                  ? "bg-sky-500/20 text-sky-800 border-sky-500/70 dark:text-sky-200 dark:border-sky-400"
+                  : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+              }`}
+            >
+              <span>🇺🇸 USA (California & Corn Belt)</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              {isAr ? "مناطق سريعة:" : "Quick Presets:"}
+            </span>
+            {featuredPresets.map((preset) => {
+              const selected = govId === preset.id;
+              return (
+                <Button
+                  key={preset.id}
+                  size="sm"
+                  variant={selected ? "solid" : "bordered"}
+                  color={activeCountry === "US" ? "primary" : "success"}
+                  aria-pressed={selected}
+                  onPress={() => handleSelectGovernorate(preset.id)}
+                  className={
+                    selected
+                      ? "font-bold text-xs"
+                      : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium"
+                  }
+                >
+                  {isAr ? preset.nameAr : preset.nameEn}
+                </Button>
+              );
+            })}
+            <Chip
+              size="sm"
+              variant="flat"
+              color={activeCountry === "US" ? "primary" : "success"}
+              className="font-bold text-[11px] tabular-telemetry"
+            >
+              {activeCountry === "US"
+                ? "$ USD / Acre"
+                : isAr
+                ? "ج.م / فدان"
+                : "EGP / Feddan"}
+            </Chip>
+          </div>
+        </section>
+
         {/* Step 1 & Step 2 Row */}
         <div className="grid grid-cols-12 gap-4 items-stretch">
           {/* Step 1: Location & Previous Crop */}
@@ -374,9 +481,13 @@ export default function OrbitAgriCockpitPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-end">
               <Select
                 label={
-                  isAr
-                    ? "اختر المحافظة (أو اضغط على الخريطة)"
-                    : "Select Governorate (or click map)"
+                  activeCountry === "US"
+                    ? isAr
+                      ? "اختر الإقليم الأمريكي (أو اضغط على الخريطة)"
+                      : "Select US Agricultural Region (or click map)"
+                    : isAr
+                    ? "اختر المحافظة المصرية (أو اضغط على الخريطة)"
+                    : "Select Egyptian Governorate (or click map)"
                 }
                 size="sm"
                 variant="bordered"
@@ -399,7 +510,7 @@ export default function OrbitAgriCockpitPage() {
                     "bg-white dark:bg-[#0d1421] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100",
                 }}
               >
-                {GOVERNORATES.map((gov) => (
+                {countryGovernorates.map((gov) => (
                   <SelectItem
                     key={gov.id}
                     textValue={isAr ? gov.nameAr : gov.nameEn}
@@ -532,6 +643,7 @@ export default function OrbitAgriCockpitPage() {
             pathways={instantData.pathways}
             selectedPathwayId={selectedPathwayId}
             onSelectPathway={setSelectedPathwayId}
+            country={activeCountry}
           />
 
           <div className="grid grid-cols-12 gap-4 items-start pt-1">
@@ -547,6 +659,7 @@ export default function OrbitAgriCockpitPage() {
                 selectedPathway={activePathway}
                 cashPathway={cashPathway}
                 annualRecords={instantData.annualRecords}
+                country={activeCountry}
               />
             </div>
           </div>
@@ -561,7 +674,7 @@ export default function OrbitAgriCockpitPage() {
             </div>
 
             <div className="col-span-12 lg:col-span-6">
-              <FieldGrid3x3 pathway={activePathway} />
+              <FieldGrid3x3 pathway={activePathway} country={activeCountry} />
             </div>
           </div>
         </section>

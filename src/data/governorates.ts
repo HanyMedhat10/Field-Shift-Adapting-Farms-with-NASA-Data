@@ -1,5 +1,10 @@
+import { CountryCode } from "@/lib/currency";
+
+export type { CountryCode };
+
 export interface GovernorateInfo {
   id: string;
+  country: CountryCode;
   nameAr: string;
   nameEn: string;
   regionAr: string;
@@ -17,8 +22,9 @@ export interface GovernorateInfo {
 export const GOVERNORATES: GovernorateInfo[] = [
   {
     id: "gharbia",
-    nameAr: "الغربية",
-    nameEn: "Gharbia",
+    country: "EG",
+    nameAr: "دلتا النيل — الغربية",
+    nameEn: "Nile Delta — Gharbia",
     regionAr: "وسط الدلتا — طنطا",
     regionEn: "Central Delta — Tanta",
     soilTypeAr: "طينية خصبة عميقة",
@@ -32,6 +38,7 @@ export const GOVERNORATES: GovernorateInfo[] = [
   },
   {
     id: "dakahlia",
+    country: "EG",
     nameAr: "الدقهلية",
     nameEn: "Dakahlia",
     regionAr: "شمال شرق الدلتا — المنصورة",
@@ -47,6 +54,7 @@ export const GOVERNORATES: GovernorateInfo[] = [
   },
   {
     id: "beheira",
+    country: "EG",
     nameAr: "البحيرة",
     nameEn: "Beheira",
     regionAr: "غرب الدلتا — النوبارية ودمنهور",
@@ -62,6 +70,7 @@ export const GOVERNORATES: GovernorateInfo[] = [
   },
   {
     id: "minya",
+    country: "EG",
     nameAr: "المنيا",
     nameEn: "Minya",
     regionAr: "مصر الوسطى — وادي النيل",
@@ -77,6 +86,7 @@ export const GOVERNORATES: GovernorateInfo[] = [
   },
   {
     id: "fayoum",
+    country: "EG",
     nameAr: "الفيوم",
     nameEn: "Fayoum",
     regionAr: "منخفض الفيوم — سنورس",
@@ -92,6 +102,7 @@ export const GOVERNORATES: GovernorateInfo[] = [
   },
   {
     id: "new_valley",
+    country: "EG",
     nameAr: "الوادي الجديد",
     nameEn: "New Valley",
     regionAr: "الواحات — الخارجة والداخلة",
@@ -105,7 +116,60 @@ export const GOVERNORATES: GovernorateInfo[] = [
     baselineSmapRoot: 0.24,
     waterStressFactor: 1.28,
   },
+  {
+    id: "us_california",
+    country: "US",
+    nameAr: "وادي كاليفورنيا الأوسط",
+    nameEn: "California Central Valley",
+    regionAr: "فريزنو — كاليفورنيا، أمريكا",
+    regionEn: "Fresno Basin — California, USA",
+    soilTypeAr: "طينية طميية مروية (وادي سان هواكين)",
+    soilTypeEn: "Irrigated alluvial clay-loam (San Joaquin)",
+    lat: 36.7378,
+    lon: -119.7871,
+    baselineTempC: 18.2,
+    baselineNdvi: 0.68,
+    baselineSmapRoot: 0.48,
+    waterStressFactor: 1.14,
+  },
+  {
+    id: "us_iowa",
+    country: "US",
+    nameAr: "حزام الذرة — أيوا",
+    nameEn: "Iowa Corn Belt",
+    regionAr: "دي موين / أيمز — أيوا، أمريكا",
+    regionEn: "Des Moines / Ames — Iowa, USA",
+    soilTypeAr: "تربة البراري السوداء عالية الخصوبة",
+    soilTypeEn: "Deep fertile prairie Mollisol",
+    lat: 41.878,
+    lon: -93.0977,
+    baselineTempC: 10.4,
+    baselineNdvi: 0.79,
+    baselineSmapRoot: 0.67,
+    waterStressFactor: 0.88,
+  },
+  {
+    id: "us_kansas",
+    country: "US",
+    nameAr: "حزام القمح — كانساس",
+    nameEn: "Kansas Wheat Belt",
+    regionAr: "السهول الكبرى — حوض أوجالالا، أمريكا",
+    regionEn: "Great Plains — Ogallala Aquifer, USA",
+    soilTypeAr: "طفلية سهلية (مياه جوفية)",
+    soilTypeEn: "Great Plains silt-loam (Ogallala aquifer)",
+    lat: 38.5266,
+    lon: -98.7645,
+    baselineTempC: 13.6,
+    baselineNdvi: 0.58,
+    baselineSmapRoot: 0.43,
+    waterStressFactor: 1.16,
+  },
 ];
+
+export const FEATURED_PRESET_IDS: Record<CountryCode, string[]> = {
+  EG: ["gharbia", "minya", "new_valley"],
+  US: ["us_california", "us_iowa", "us_kansas"],
+};
 
 export function findNearestGovernorate(lat: number, lon: number): GovernorateInfo {
   let nearest = GOVERNORATES[0];
@@ -119,4 +183,3 @@ export function findNearestGovernorate(lat: number, lon: number): GovernorateInf
   }
   return nearest;
 }
-

@@ -3,6 +3,11 @@
 import { useLanguage } from "@/app/providers";
 import { Chip } from "@heroui/react";
 import { AnnualClimateRecord } from "@/data/nasaFallback";
+import {
+  CountryCode,
+  formatProfitShort,
+  formatProfitWithUnit,
+} from "@/lib/currency";
 import { PathwaySimulationResult } from "@/lib/simulationEngine";
 import { Activity, CheckCircle2, ShieldAlert, TrendingUp } from "lucide-react";
 
@@ -10,12 +15,14 @@ interface UncertaintyBandsProps {
   selectedPathway: PathwaySimulationResult;
   cashPathway: PathwaySimulationResult;
   annualRecords: AnnualClimateRecord[];
+  country?: CountryCode;
 }
 
 export function UncertaintyBands({
   selectedPathway,
   cashPathway,
   annualRecords,
+  country = "EG",
 }: UncertaintyBandsProps) {
   const { isAr } = useLanguage();
   const maxReference = Math.max(
@@ -36,15 +43,13 @@ export function UncertaintyBands({
   const cashP90Width = calcPct(cashPathway.p90Egp);
 
   const showCashMarker = selectedPathway.id !== "cash";
-  const p10Advantage = selectedPathway.p10Egp - cashPathway.p10Egp;
+  const p10AdvantageEgp = selectedPathway.p10Egp - cashPathway.p10Egp;
 
   const maxAnnualProfit = Math.max(
     ...selectedPathway.annualProfitsEgp,
     120000
   );
 
-  const unitLabel = isAr ? "ج/فدان" : "EGP/fed";
-  const shortCurrency = isAr ? "ج" : "EGP";
   const summaryLines = isAr
     ? selectedPathway.plainSummaryLinesAr
     : selectedPathway.plainSummaryLinesEn;
@@ -80,7 +85,7 @@ export function UncertaintyBands({
               {isAr ? "أسوأ سنة مناخية (P10)" : "Worst Climate Year (P10)"}
             </span>
             <span className="font-bold text-rose-700 dark:text-rose-300 tabular-telemetry">
-              {selectedPathway.p10Egp.toLocaleString("en-US")} {unitLabel}
+              {formatProfitWithUnit(selectedPathway.p10Egp, country, isAr)}
             </span>
           </div>
           <div className="relative h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-900 overflow-hidden">
@@ -92,8 +97,16 @@ export function UncertaintyBands({
               <div
                 title={
                   isAr
-                    ? `أسوأ سنة للمسار النقدي: ${cashPathway.p10Egp.toLocaleString("en-US")} ج`
-                    : `Cash Baseline Worst Year: ${cashPathway.p10Egp.toLocaleString("en-US")} EGP`
+                    ? `أسوأ سنة للمسار النقدي: ${formatProfitShort(
+                        cashPathway.p10Egp,
+                        country,
+                        isAr
+                      )}`
+                    : `Cash Baseline Worst Year: ${formatProfitShort(
+                        cashPathway.p10Egp,
+                        country,
+                        isAr
+                      )}`
                 }
                 className="absolute top-0 bottom-0 w-0.5 bg-amber-500 dark:bg-amber-300"
                 style={{ insetInlineStart: `${cashP10Width}%` }}
@@ -108,7 +121,7 @@ export function UncertaintyBands({
               {isAr ? "المتوسط المتوقع (P50)" : "Expected Median (P50)"}
             </span>
             <span className="font-bold text-emerald-700 dark:text-emerald-300 tabular-telemetry">
-              {selectedPathway.p50Egp.toLocaleString("en-US")} {unitLabel}
+              {formatProfitWithUnit(selectedPathway.p50Egp, country, isAr)}
             </span>
           </div>
           <div className="relative h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-900 overflow-hidden">
@@ -120,8 +133,16 @@ export function UncertaintyBands({
               <div
                 title={
                   isAr
-                    ? `متوسط المسار النقدي: ${cashPathway.p50Egp.toLocaleString("en-US")} ج`
-                    : `Cash Baseline Median: ${cashPathway.p50Egp.toLocaleString("en-US")} EGP`
+                    ? `متوسط المسار النقدي: ${formatProfitShort(
+                        cashPathway.p50Egp,
+                        country,
+                        isAr
+                      )}`
+                    : `Cash Baseline Median: ${formatProfitShort(
+                        cashPathway.p50Egp,
+                        country,
+                        isAr
+                      )}`
                 }
                 className="absolute top-0 bottom-0 w-0.5 bg-amber-500 dark:bg-amber-300"
                 style={{ insetInlineStart: `${cashP50Width}%` }}
@@ -136,7 +157,7 @@ export function UncertaintyBands({
               {isAr ? "أفضل موسم (P90)" : "Best Climate Year (P90)"}
             </span>
             <span className="font-bold text-sky-700 dark:text-sky-300 tabular-telemetry">
-              {selectedPathway.p90Egp.toLocaleString("en-US")} {unitLabel}
+              {formatProfitWithUnit(selectedPathway.p90Egp, country, isAr)}
             </span>
           </div>
           <div className="relative h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-900 overflow-hidden">
@@ -148,8 +169,16 @@ export function UncertaintyBands({
               <div
                 title={
                   isAr
-                    ? `أفضل موسم للمسار النقدي: ${cashPathway.p90Egp.toLocaleString("en-US")} ج`
-                    : `Cash Baseline Best Year: ${cashPathway.p90Egp.toLocaleString("en-US")} EGP`
+                    ? `أفضل موسم للمسار النقدي: ${formatProfitShort(
+                        cashPathway.p90Egp,
+                        country,
+                        isAr
+                      )}`
+                    : `Cash Baseline Best Year: ${formatProfitShort(
+                        cashPathway.p90Egp,
+                        country,
+                        isAr
+                      )}`
                 }
                 className="absolute top-0 bottom-0 w-0.5 bg-amber-500 dark:bg-amber-300"
                 style={{ insetInlineStart: `${cashP90Width}%` }}
@@ -168,10 +197,8 @@ export function UncertaintyBands({
             <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold tabular-telemetry">
               <TrendingUp className="h-3.5 w-3.5" />
               {isAr ? "أمان إضافي في أسوأ سنة:" : "Worst-year upside:"}{" "}
-              {p10Advantage >= 0
-                ? `+${p10Advantage.toLocaleString("en-US")}`
-                : p10Advantage.toLocaleString("en-US")}{" "}
-              {shortCurrency}
+              {p10AdvantageEgp >= 0 ? "+" : "-"}
+              {formatProfitShort(Math.abs(p10AdvantageEgp), country, isAr)}
             </span>
           </div>
         )}
@@ -200,7 +227,11 @@ export function UncertaintyBands({
             return (
               <div
                 key={yr?.year ?? idx}
-                title={`${yr?.year ?? 2015 + idx}: ${profit.toLocaleString("en-US")} ${unitLabel}`}
+                title={`${yr?.year ?? 2015 + idx}: ${formatProfitWithUnit(
+                  profit,
+                  country,
+                  isAr
+                )}`}
                 className="flex flex-col items-center justify-end h-full gap-0.5"
               >
                 <div

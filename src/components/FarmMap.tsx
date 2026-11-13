@@ -32,8 +32,8 @@ const ESRI_WORLD_IMAGERY_URL =
 function MapViewportSync({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo([lat, lon], map.getZoom() < 11 ? 12 : map.getZoom(), {
-      duration: 0.75,
+    map.flyTo([lat, lon], 9, {
+      duration: 1.2,
     });
   }, [lat, lon, map]);
   return null;
@@ -63,8 +63,8 @@ export default function FarmMap({
   const { isAr } = useLanguage();
   const [showNdviLayer, setShowNdviLayer] = useState(true);
 
-  const dLat = 0.0022;
-  const dLon = 0.0026;
+  const dLat = 0.015;
+  const dLon = 0.018;
   const fieldBounds: [number, number][] = [
     [lat + dLat, lon - dLon],
     [lat + dLat, lon + dLon],

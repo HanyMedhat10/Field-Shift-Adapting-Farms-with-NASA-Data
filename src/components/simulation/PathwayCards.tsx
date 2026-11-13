@@ -2,6 +2,7 @@
 
 import { useLanguage } from "@/app/providers";
 import { Card, CardBody, Chip } from "@heroui/react";
+import { CountryCode, formatProfitShort } from "@/lib/currency";
 import { PathwayId, PathwaySimulationResult } from "@/lib/simulationEngine";
 import {
   AlertTriangle,
@@ -18,6 +19,7 @@ interface PathwayCardsProps {
   pathways: Record<PathwayId, PathwaySimulationResult>;
   selectedPathwayId: PathwayId;
   onSelectPathway: (id: PathwayId) => void;
+  country?: CountryCode;
 }
 
 const ORDERED_IDS: PathwayId[] = ["balanced", "cash", "resilient"];
@@ -26,6 +28,7 @@ export function PathwayCards({
   pathways,
   selectedPathwayId,
   onSelectPathway,
+  country = "EG",
 }: PathwayCardsProps) {
   const { isAr } = useLanguage();
   const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
@@ -51,7 +54,6 @@ export function PathwayCards({
             ? AlertTriangle
             : ShieldCheck;
 
-        const currency = isAr ? "ج" : "EGP";
         const conflictText = isAr ? item.conflictDetailsAr : item.conflictDetailsEn;
 
         return (
@@ -128,13 +130,13 @@ export function PathwayCards({
                   <span className="text-slate-700 dark:text-slate-300">
                     {isAr ? "المتوسط المتوقع:" : "Expected Median:"}{" "}
                     <strong className="text-slate-950 dark:text-slate-50">
-                      {item.p50Egp.toLocaleString("en-US")} {currency}
+                      {formatProfitShort(item.p50Egp, country, isAr)}
                     </strong>
                   </span>
                   <span className="text-amber-700 dark:text-amber-300">
                     {isAr ? "أسوأ سنة:" : "Worst Year:"}{" "}
                     <strong>
-                      {item.p10Egp.toLocaleString("en-US")} {currency}
+                      {formatProfitShort(item.p10Egp, country, isAr)}
                     </strong>
                   </span>
                 </div>

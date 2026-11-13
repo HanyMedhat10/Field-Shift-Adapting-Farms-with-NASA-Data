@@ -82,7 +82,8 @@ export function getFallbackAnnualClimate(
   lat: number,
   lon: number
 ): AnnualClimateRecord[] {
-  const latShift = (30.5 - lat) * 0.48;
+  const refLat = gov.country === "US" ? 38.5 : 30.5;
+  const latShift = (refLat - lat) * 0.48;
   const lonDrift = Math.sin(lon * 1.9) * 0.02;
   const baseTemp = gov.baselineTempC + latShift * 0.25;
 
@@ -95,10 +96,17 @@ export function getFallbackAnnualClimate(
       ).toFixed(2)
     );
     const solarRadiationKwhM2Day = Number(
-      (5.45 + (31.0 - lat) * 0.14 + item.solarDelta).toFixed(2)
+      Math.max(
+        3.5,
+        5.45 + (31.0 - lat) * 0.14 + item.solarDelta
+      ).toFixed(2)
     );
     const precipMmDay = Number(
-      Math.max(0.01, (lat > 30 ? 0.18 : 0.04) * item.moistFactor).toFixed(3)
+      Math.max(
+        0.01,
+        (gov.country === "US" ? 1.45 : lat > 30 ? 0.18 : 0.04) *
+          item.moistFactor
+      ).toFixed(3)
     );
 
     return {
@@ -272,6 +280,7 @@ export function buildRawNasaPayload(params: {
   return {
     metadata: {
       project: "ElMazra3a EL sa3ida — NASA Space Apps 2026 (Field Shift)",
+      country: gov.country === "US" ? "USA" : "Egypt",
       governorate: `${gov.nameAr} (${gov.nameEn})`,
       coordinates: { lat: Number(lat.toFixed(4)), lon: Number(lon.toFixed(4)) },
       cachePolicy: "Next.js Data Cache (revalidate: 86400s, timeout: 6000ms)",
