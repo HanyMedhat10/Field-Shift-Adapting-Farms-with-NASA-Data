@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/app/providers";
 import {
   Button,
   Chip,
@@ -17,6 +18,7 @@ interface RawJsonModalProps {
   onOpenChange: (open: boolean) => void;
   rawJson: unknown;
   sourceLabelAr: string;
+  sourceLabelEn: string;
   powerLive: boolean;
   asfLive: boolean;
 }
@@ -26,9 +28,11 @@ export function RawJsonModal({
   onOpenChange,
   rawJson,
   sourceLabelAr,
+  sourceLabelEn,
   powerLive,
   asfLive,
 }: RawJsonModalProps) {
+  const { isAr } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   const formatted = JSON.stringify(rawJson, null, 2);
@@ -63,7 +67,9 @@ export function RawJsonModal({
                 <div className="flex items-center gap-2">
                   <Database className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   <h2 className="text-lg font-bold">
-                    مخرجات API ناسا الخام (NASA POWER & ASF Sentinel-1)
+                    {isAr
+                      ? "مخرجات API ناسا الخام (NASA POWER & ASF Sentinel-1)"
+                      : "Raw NASA API Output (NASA POWER & ASF Sentinel-1)"}
                   </h2>
                 </div>
                 <Chip
@@ -72,7 +78,7 @@ export function RawJsonModal({
                   color={powerLive || asfLive ? "success" : "warning"}
                   startContent={<Satellite className="h-3.5 w-3.5" />}
                 >
-                  {sourceLabelAr}
+                  {isAr ? sourceLabelAr : sourceLabelEn}
                 </Chip>
               </div>
               <div className="flex flex-wrap gap-2 text-xs font-normal text-slate-600 dark:text-slate-400">
@@ -81,14 +87,28 @@ export function RawJsonModal({
                   variant="bordered"
                   className="border-slate-300 dark:border-slate-700"
                 >
-                  POWER API: {powerLive ? "حي (Live)" : "احتياطي محلي (Fallback)"}
+                  POWER API:{" "}
+                  {powerLive
+                    ? isAr
+                      ? "حي (Live)"
+                      : "Live"
+                    : isAr
+                    ? "احتياطي محلي (Fallback)"
+                    : "Local Cache (Fallback)"}
                 </Chip>
                 <Chip
                   size="sm"
                   variant="bordered"
                   className="border-slate-300 dark:border-slate-700"
                 >
-                  ASF SAR: {asfLive ? "حي (Live)" : "احتياطي محلي (Fallback)"}
+                  ASF SAR:{" "}
+                  {asfLive
+                    ? isAr
+                      ? "حي (Live)"
+                      : "Live"
+                    : isAr
+                    ? "احتياطي محلي (Fallback)"
+                    : "Local Cache (Fallback)"}
                 </Chip>
                 <Chip
                   size="sm"
@@ -123,10 +143,16 @@ export function RawJsonModal({
                   )
                 }
               >
-                {copied ? "تم النسخ" : "نسخ JSON"}
+                {copied
+                  ? isAr
+                    ? "تم النسخ"
+                    : "Copied"
+                  : isAr
+                  ? "نسخ JSON"
+                  : "Copy JSON"}
               </Button>
               <Button size="sm" color="default" variant="flat" onPress={onClose}>
-                إغلاق
+                {isAr ? "إغلاق" : "Close"}
               </Button>
             </ModalFooter>
           </>

@@ -3,7 +3,9 @@ export interface GovernorateInfo {
   nameAr: string;
   nameEn: string;
   regionAr: string;
+  regionEn: string;
   soilTypeAr: string;
+  soilTypeEn: string;
   lat: number;
   lon: number;
   baselineTempC: number;
@@ -18,7 +20,9 @@ export const GOVERNORATES: GovernorateInfo[] = [
     nameAr: "الغربية",
     nameEn: "Gharbia",
     regionAr: "وسط الدلتا — طنطا",
+    regionEn: "Central Delta — Tanta",
     soilTypeAr: "طينية خصبة عميقة",
+    soilTypeEn: "Deep fertile clay",
     lat: 30.8754,
     lon: 31.0335,
     baselineTempC: 21.4,
@@ -31,7 +35,9 @@ export const GOVERNORATES: GovernorateInfo[] = [
     nameAr: "الدقهلية",
     nameEn: "Dakahlia",
     regionAr: "شمال شرق الدلتا — المنصورة",
+    regionEn: "Northeast Delta — Mansoura",
     soilTypeAr: "رسوبية ثقيلة عالية الخصوبة",
+    soilTypeEn: "Heavy high-fertility alluvial",
     lat: 31.0409,
     lon: 31.3785,
     baselineTempC: 21.1,
@@ -44,7 +50,9 @@ export const GOVERNORATES: GovernorateInfo[] = [
     nameAr: "البحيرة",
     nameEn: "Beheira",
     regionAr: "غرب الدلتا — النوبارية ودمنهور",
+    regionEn: "West Delta — Nubariya & Damanhour",
     soilTypeAr: "طينية رملية مستصلحة",
+    soilTypeEn: "Reclaimed sandy-clay",
     lat: 30.8481,
     lon: 30.3436,
     baselineTempC: 21.6,
@@ -57,7 +65,9 @@ export const GOVERNORATES: GovernorateInfo[] = [
     nameAr: "المنيا",
     nameEn: "Minya",
     regionAr: "مصر الوسطى — وادي النيل",
+    regionEn: "Middle Egypt — Nile Valley",
     soilTypeAr: "طينية صفراء دافئة",
+    soilTypeEn: "Warm yellow clay-loam",
     lat: 28.1099,
     lon: 30.7503,
     baselineTempC: 23.2,
@@ -70,7 +80,9 @@ export const GOVERNORATES: GovernorateInfo[] = [
     nameAr: "الفيوم",
     nameEn: "Fayoum",
     regionAr: "منخفض الفيوم — سنورس",
+    regionEn: "Fayoum Depression — Sinnuris",
     soilTypeAr: "طينية جيرية متأثرة بالصرف",
+    soilTypeEn: "Calcareous clay with drainage sensitivity",
     lat: 29.3084,
     lon: 30.8428,
     baselineTempC: 22.7,
@@ -83,7 +95,9 @@ export const GOVERNORATES: GovernorateInfo[] = [
     nameAr: "الوادي الجديد",
     nameEn: "New Valley",
     regionAr: "الواحات — الخارجة والداخلة",
+    regionEn: "Oases — Kharga & Dakhla",
     soilTypeAr: "رملية طفلية جافة (ري جوفي)",
+    soilTypeEn: "Arid sandy-loam (groundwater irrigation)",
     lat: 25.4514,
     lon: 30.5463,
     baselineTempC: 25.4,

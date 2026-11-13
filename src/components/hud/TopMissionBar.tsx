@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@/app/providers";
+import { useLanguage, useTheme } from "@/app/providers";
 import {
   Button,
   Chip,
@@ -11,6 +11,7 @@ import {
 import {
   Database,
   Droplets,
+  Globe,
   MapPin,
   Moon,
   PackageCheck,
@@ -22,6 +23,7 @@ import {
 
 interface TopMissionBarProps {
   governorateNameAr: string;
+  governorateNameEn: string;
   coordinates: { lat: number; lon: number };
   thermalAnomalyC: number;
   rootMoisturePct: number;
@@ -34,6 +36,7 @@ interface TopMissionBarProps {
 
 export function TopMissionBar({
   governorateNameAr,
+  governorateNameEn,
   coordinates,
   thermalAnomalyC,
   rootMoisturePct,
@@ -44,6 +47,9 @@ export function TopMissionBar({
   onOpenPitchModal,
 }: TopMissionBarProps) {
   const { isDark, toggleTheme } = useTheme();
+  const { isAr, toggleLanguage } = useLanguage();
+
+  const govName = isAr ? governorateNameAr : governorateNameEn;
 
   return (
     <Navbar
@@ -62,7 +68,9 @@ export function TopMissionBar({
         <div className="flex flex-col leading-tight">
           <div className="flex items-center gap-2">
             <span className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
-              ElMazra3a EL sa3ida — مستشار الدورة الزراعية
+              {isAr
+                ? "ElMazra3a EL sa3ida — مستشار الدورة الزراعية"
+                : "ElMazra3a EL sa3ida — Crop Rotation Advisor"}
             </span>
             <Chip
               size="sm"
@@ -70,12 +78,18 @@ export function TopMissionBar({
               color={isLiveNasa ? "success" : "warning"}
               className="h-5 text-[11px]"
             >
-              {isLiveNasa ? "ناسا متصلة" : "بيانات دلتا النيل"}
+              {isLiveNasa
+                ? isAr
+                  ? "ناسا متصلة"
+                  : "NASA Live"
+                : isAr
+                ? "بيانات دلتا النيل"
+                : "Nile Delta Cache"}
             </Chip>
           </div>
           <span className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 tabular-telemetry">
             <MapPin className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-            {governorateNameAr} ({coordinates.lat.toFixed(2)}°N,{" "}
+            {govName} ({coordinates.lat.toFixed(2)}°N,{" "}
             {coordinates.lon.toFixed(2)}°E)
           </span>
         </div>
@@ -88,7 +102,9 @@ export function TopMissionBar({
           startContent={<ThermometerSun className="h-3.5 w-3.5" />}
           className="font-semibold tabular-telemetry"
         >
-          تغيّر حرارة ناسا (10 سنوات):{" "}
+          {isAr
+            ? "تغيّر حرارة ناسا (10 سنوات):"
+            : "NASA 10-Yr Temp Anomaly:"}{" "}
           {thermalAnomalyC >= 0 ? `+${thermalAnomalyC}` : thermalAnomalyC}°C
         </Chip>
 
@@ -98,7 +114,8 @@ export function TopMissionBar({
           startContent={<Droplets className="h-3.5 w-3.5" />}
           className="font-semibold tabular-telemetry"
         >
-          رطوبة التربة (SMAP): {rootMoisturePct}%
+          {isAr ? "رطوبة التربة (SMAP):" : "Soil Moisture (SMAP):"}{" "}
+          {rootMoisturePct}%
         </Chip>
 
         <Chip
@@ -107,7 +124,9 @@ export function TopMissionBar({
           startContent={<PackageCheck className="h-3.5 w-3.5" />}
           className="font-semibold tabular-telemetry"
         >
-          توفير {ureaSacksSaved} شكارة يوريا | {waterSavedPct}% ماء
+          {isAr
+            ? `توفير ${ureaSacksSaved} شكارة يوريا | ${waterSavedPct}% ماء`
+            : `Save ${ureaSacksSaved} Urea Sacks | ${waterSavedPct}% Water`}
         </Chip>
       </NavbarContent>
 
@@ -116,8 +135,30 @@ export function TopMissionBar({
           size="sm"
           variant="bordered"
           color="default"
+          onPress={toggleLanguage}
+          aria-label={isAr ? "Switch to English" : "التبديل إلى العربية"}
+          startContent={
+            <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          }
+          className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-emerald-500/60 font-semibold"
+        >
+          {isAr ? "English" : "العربية"}
+        </Button>
+
+        <Button
+          size="sm"
+          variant="bordered"
+          color="default"
           onPress={toggleTheme}
-          aria-label={isDark ? "التبديل إلى الوضع النهاري" : "التبديل إلى الوضع الليلي"}
+          aria-label={
+            isDark
+              ? isAr
+                ? "التبديل إلى الوضع النهاري"
+                : "Switch to Light Mode"
+              : isAr
+              ? "التبديل إلى الوضع الليلي"
+              : "Switch to Dark Mode"
+          }
           startContent={
             isDark ? (
               <Sun className="h-3.5 w-3.5 text-amber-400" />
@@ -127,7 +168,13 @@ export function TopMissionBar({
           }
           className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-amber-500/60 font-medium"
         >
-          {isDark ? "الوضع النهاري" : "الوضع الليلي"}
+          {isDark
+            ? isAr
+              ? "الوضع النهاري"
+              : "Light Mode"
+            : isAr
+            ? "الوضع الليلي"
+            : "Dark Mode"}
         </Button>
 
         <Button
@@ -140,7 +187,7 @@ export function TopMissionBar({
           }
           className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-emerald-500/60 font-medium"
         >
-          ملخص التحكيم
+          {isAr ? "ملخص التحكيم" : "Judge Pitch"}
         </Button>
 
         <Button
@@ -153,7 +200,7 @@ export function TopMissionBar({
           }
           className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-sky-500/60 font-medium"
         >
-          عرض بيانات ناسا الخام (JSON)
+          {isAr ? "عرض بيانات ناسا الخام (JSON)" : "Raw NASA JSON"}
         </Button>
       </NavbarContent>
     </Navbar>

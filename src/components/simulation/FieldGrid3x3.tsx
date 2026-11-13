@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/app/providers";
 import { Chip } from "@heroui/react";
 import { motion } from "framer-motion";
 import { FieldPlotCell, PathwaySimulationResult } from "@/lib/simulationEngine";
@@ -11,6 +12,7 @@ interface FieldGrid3x3Props {
 }
 
 export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
+  const { isAr } = useLanguage();
   const [seasonView, setSeasonView] = useState<1 | 2 | 3>(1);
   const [activePlotIdx, setActivePlotIdx] = useState<number>(0);
 
@@ -31,7 +33,11 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
           <Grid3x3 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          <span>شبكة الحقل التفاعلية (1 فدان = 9 أحواض)</span>
+          <span>
+            {isAr
+              ? "شبكة الحقل التفاعلية (1 فدان = 9 أحواض)"
+              : "Interactive Field Grid (1 Feddan = 9 Plots)"}
+          </span>
         </div>
 
         <div className="flex items-center gap-1">
@@ -47,7 +53,7 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
                   : "bg-white text-slate-600 border border-slate-300 hover:text-slate-900 dark:bg-[#0d1421] dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              موسم {s}
+              {isAr ? `موسم ${s}` : `Season ${s}`}
             </button>
           ))}
         </div>
@@ -66,7 +72,7 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
               initial={{ opacity: 0.7, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.18, delay: idx * 0.015 }}
-              className={`flex flex-col items-start justify-between rounded-lg border p-2 text-right transition-colors ${
+              className={`flex flex-col items-start justify-between rounded-lg border p-2 text-start transition-colors ${
                 cell.hasConflict
                   ? "bg-rose-50 border-rose-400 dark:bg-rose-950/35 dark:border-rose-500/60"
                   : isFocused
@@ -76,7 +82,7 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
             >
               <div className="flex w-full items-center justify-between gap-1">
                 <span className="text-[10px] text-slate-600 dark:text-slate-400 tabular-telemetry">
-                  حوض {cell.index}
+                  {isAr ? `حوض ${cell.index}` : `Plot ${cell.index}`}
                 </span>
                 {cell.hasConflict ? (
                   <AlertOctagon className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
@@ -89,11 +95,11 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
               </div>
 
               <span className="mt-1 text-xs font-bold text-slate-900 dark:text-slate-100 truncate w-full">
-                {crop.nameAr}
+                {isAr ? crop.nameAr : crop.nameEn}
               </span>
 
               <div className="mt-1 flex w-full items-center justify-between text-[10px] text-slate-600 dark:text-slate-400 tabular-telemetry">
-                <span>{crop.familyAr}</span>
+                <span>{isAr ? crop.familyAr : crop.family}</span>
                 <span
                   className={
                     cell.healthScore >= 70
@@ -116,7 +122,7 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-slate-900 dark:text-slate-200">
-                {selectedCell.labelAr}
+                {isAr ? selectedCell.labelAr : selectedCell.labelEn}
               </span>
               <Chip
                 size="sm"
@@ -125,19 +131,24 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
                 className="h-5 text-[11px]"
               >
                 {selectedCell.hasConflict
-                  ? "تعارض عائلة نباتية"
-                  : `صحة التربة ${selectedCell.healthScore}%`}
+                  ? isAr
+                    ? "تعارض عائلة نباتية"
+                    : "Botanical Clash"
+                  : isAr
+                  ? `صحة التربة ${selectedCell.healthScore}%`
+                  : `Soil Health ${selectedCell.healthScore}%`}
               </Chip>
             </div>
             <span className="text-slate-700 dark:text-slate-300 font-semibold tabular-telemetry">
-              موسم {seasonView}: {activeSeasonCrop.nameAr} (
-              {activeSeasonCrop.seasonAr})
+              {isAr
+                ? `موسم ${seasonView}: ${activeSeasonCrop.nameAr} (${activeSeasonCrop.seasonAr})`
+                : `Season ${seasonView}: ${activeSeasonCrop.nameEn} (${activeSeasonCrop.seasonEn})`}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-400 tabular-telemetry pt-1 border-t border-slate-200 dark:border-slate-800/70">
             <span>
-              أزوت الموسم:{" "}
+              {isAr ? "أزوت الموسم:" : "Season Nitrogen:"}{" "}
               <strong
                 className={
                   activeSeasonCrop.nitrogenKgPerFeddan >= 0
@@ -148,11 +159,19 @@ export function FieldGrid3x3({ pathway }: FieldGrid3x3Props) {
                 {activeSeasonCrop.nitrogenKgPerFeddan >= 0
                   ? `+${activeSeasonCrop.nitrogenKgPerFeddan}`
                   : activeSeasonCrop.nitrogenKgPerFeddan}{" "}
-                كجم
+                {isAr ? "كجم" : "kg"}
               </strong>
             </span>
-            <span>ري الموسم: {activeSeasonCrop.waterM3PerFeddan} م³</span>
-            <span>عمق الجذور: {activeSeasonCrop.rootDepthCm} سم</span>
+            <span>
+              {isAr
+                ? `ري الموسم: ${activeSeasonCrop.waterM3PerFeddan} م³`
+                : `Season Water: ${activeSeasonCrop.waterM3PerFeddan} m³`}
+            </span>
+            <span>
+              {isAr
+                ? `عمق الجذور: ${activeSeasonCrop.rootDepthCm} سم`
+                : `Root Depth: ${activeSeasonCrop.rootDepthCm} cm`}
+            </span>
           </div>
         </div>
       )}

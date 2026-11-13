@@ -23,6 +23,7 @@ export interface FieldShiftApiResponse {
     powerLive: boolean;
     asfLive: boolean;
     modeLabelAr: string;
+    modeLabelEn: string;
   };
   rawJson: unknown;
 }
@@ -30,7 +31,10 @@ export interface FieldShiftApiResponse {
 export interface CopilotApiResponse {
   mode: "gemini-live" | "offline-agronomic-advisor";
   headlineAr: string;
+  headlineEn: string;
   adviceAr: string;
+  adviceEn: string;
   actionChecklistAr: string[];
+  actionChecklistEn: string[];
 }
 

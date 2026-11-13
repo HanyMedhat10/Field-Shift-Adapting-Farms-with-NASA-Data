@@ -299,6 +299,10 @@ async function handleFieldShift(params: {
         powerLive || asfLive
           ? "متصل ببيانات ناسا الحية"
           : "بيانات دلتا النيل المحفوظة (Offline Fallback)",
+      modeLabelEn:
+        powerLive || asfLive
+          ? "Connected to Live NASA Data"
+          : "Cached Nile Delta Climate Baseline (Offline Fallback)",
     },
     rawJson,
   });

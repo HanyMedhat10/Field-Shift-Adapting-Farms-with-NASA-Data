@@ -11,7 +11,9 @@ export interface CropInfo {
   nameEn: string;
   family: BotanicalFamily;
   familyAr: string;
+  familyEn: string;
   seasonAr: string;
+  seasonEn: string;
   /** Net nitrogen impact in kg N/feddan (+ fixes nitrogen, - depletes nitrogen) */
   nitrogenKgPerFeddan: number;
   /** Irrigation water demand in m³/feddan */
@@ -37,7 +39,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Wheat",
     family: "Poaceae",
     familyAr: "النجيلية",
+    familyEn: "Poaceae (Grasses)",
     seasonAr: "شتوي",
+    seasonEn: "Winter",
     nitrogenKgPerFeddan: -46,
     waterM3PerFeddan: 1850,
     baseProfitEgp: 36000,
@@ -53,7 +57,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Fava Bean",
     family: "Fabaceae",
     familyAr: "البقولية",
+    familyEn: "Fabaceae (Legumes)",
     seasonAr: "شتوي",
+    seasonEn: "Winter",
     nitrogenKgPerFeddan: 55,
     waterM3PerFeddan: 1450,
     baseProfitEgp: 34000,
@@ -69,7 +75,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Alfalfa / Berseem",
     family: "Fabaceae",
     familyAr: "البقولية",
+    familyEn: "Fabaceae (Legumes)",
     seasonAr: "شتوي / معمر",
+    seasonEn: "Winter / Perennial",
     nitrogenKgPerFeddan: 69,
     waterM3PerFeddan: 2050,
     baseProfitEgp: 33000,
@@ -85,7 +93,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Soybean",
     family: "Fabaceae",
     familyAr: "البقولية",
+    familyEn: "Fabaceae (Legumes)",
     seasonAr: "صيفي",
+    seasonEn: "Summer",
     nitrogenKgPerFeddan: 50,
     waterM3PerFeddan: 1900,
     baseProfitEgp: 37000,
@@ -101,7 +111,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Maize",
     family: "Poaceae",
     familyAr: "النجيلية",
+    familyEn: "Poaceae (Grasses)",
     seasonAr: "صيفي",
+    seasonEn: "Summer",
     nitrogenKgPerFeddan: -55,
     waterM3PerFeddan: 2700,
     baseProfitEgp: 39000,
@@ -117,7 +129,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Potato",
     family: "Solanaceae",
     familyAr: "الباذنجانية",
+    familyEn: "Solanaceae (Nightshades)",
     seasonAr: "نيلي / شتوي",
+    seasonEn: "Nili / Winter",
     nitrogenKgPerFeddan: -65,
     waterM3PerFeddan: 2550,
     baseProfitEgp: 55000,
@@ -133,7 +147,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Tomato",
     family: "Solanaceae",
     familyAr: "الباذنجانية",
+    familyEn: "Solanaceae (Nightshades)",
     seasonAr: "صيفي / عروة",
+    seasonEn: "Summer / Transitional",
     nitrogenKgPerFeddan: -60,
     waterM3PerFeddan: 2750,
     baseProfitEgp: 52000,
@@ -149,7 +165,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Sunflower",
     family: "Asteraceae",
     familyAr: "النجمية",
+    familyEn: "Asteraceae (Asters)",
     seasonAr: "صيفي / نيلي",
+    seasonEn: "Summer / Nili",
     nitrogenKgPerFeddan: -23,
     waterM3PerFeddan: 1400,
     baseProfitEgp: 35000,
@@ -165,7 +183,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
     nameEn: "Sugar Beet",
     family: "Amaranthaceae",
     familyAr: "الرمرامية",
+    familyEn: "Amaranthaceae (Beets)",
     seasonAr: "شتوي",
+    seasonEn: "Winter",
     nitrogenKgPerFeddan: -30,
     waterM3PerFeddan: 1600,
     baseProfitEgp: 42000,
@@ -179,9 +199,9 @@ export const CROPS_MATRIX: Record<string, CropInfo> = {
 
 export type PreviousCropId = "wheat" | "potato" | "tomato" | "maize";
 
-export const PREVIOUS_CROPS: { id: PreviousCropId; labelAr: string }[] = [
-  { id: "wheat", labelAr: "قمح" },
-  { id: "potato", labelAr: "بطاطس" },
-  { id: "tomato", labelAr: "طماطم" },
-  { id: "maize", labelAr: "ذرة" },
+export const PREVIOUS_CROPS: { id: PreviousCropId; labelAr: string; labelEn: string }[] = [
+  { id: "wheat", labelAr: "قمح", labelEn: "Wheat" },
+  { id: "potato", labelAr: "بطاطس", labelEn: "Potato" },
+  { id: "tomato", labelAr: "طماطم", labelEn: "Tomato" },
+  { id: "maize", labelAr: "ذرة", labelEn: "Maize" },
 ];

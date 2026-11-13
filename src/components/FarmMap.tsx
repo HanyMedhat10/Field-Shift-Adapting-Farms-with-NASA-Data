@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/app/providers";
 import { Switch } from "@heroui/react";
 import { Crosshair, Layers, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ interface FarmMapProps {
   lat: number;
   lon: number;
   governorateNameAr: string;
+  governorateNameEn: string;
   ndviValue: number;
   onSelectLocation: (lat: number, lon: number) => void;
 }
@@ -54,9 +56,11 @@ export default function FarmMap({
   lat,
   lon,
   governorateNameAr,
+  governorateNameEn,
   ndviValue,
   onSelectLocation,
 }: FarmMapProps) {
+  const { isAr } = useLanguage();
   const [showNdviLayer, setShowNdviLayer] = useState(true);
 
   const dLat = 0.0022;
@@ -74,7 +78,9 @@ export default function FarmMap({
         <div className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200">
           <Layers className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span className="font-medium">
-            إظهار صحة الغطاء النباتي من قمر ناسا (MODIS NDVI)
+            {isAr
+              ? "إظهار صحة الغطاء النباتي من قمر ناسا (MODIS NDVI)"
+              : "Overlay NASA Vegetation Health Layer (MODIS NDVI)"}
           </span>
         </div>
         <Switch
@@ -82,7 +88,11 @@ export default function FarmMap({
           color="success"
           isSelected={showNdviLayer}
           onValueChange={setShowNdviLayer}
-          aria-label="إظهار صحة الغطاء النباتي من قمر ناسا"
+          aria-label={
+            isAr
+              ? "إظهار صحة الغطاء النباتي من قمر ناسا"
+              : "Toggle NASA MODIS NDVI layer"
+          }
         />
       </div>
 
@@ -132,7 +142,9 @@ export default function FarmMap({
           >
             <Tooltip direction="top" offset={[0, -8]} permanent={false}>
               <div className="text-xs font-semibold">
-                {governorateNameAr} | صحة النبات: {ndviValue}
+                {isAr
+                  ? `${governorateNameAr} | صحة النبات: ${ndviValue}`
+                  : `${governorateNameEn} | NDVI: ${ndviValue}`}
               </div>
             </Tooltip>
           </CircleMarker>
@@ -140,7 +152,11 @@ export default function FarmMap({
 
         <div className="pointer-events-none absolute bottom-2 right-2 z-[400] flex items-center gap-1.5 rounded-md bg-[#070b12]/90 border border-slate-700/80 px-2.5 py-1 text-[11px] text-slate-200">
           <Crosshair className="h-3.5 w-3.5 text-sky-400" />
-          <span>اضغط على أي أرض في الخريطة لتحديث الإحداثيات</span>
+          <span>
+            {isAr
+              ? "اضغط على أي أرض في الخريطة لتحديث الإحداثيات"
+              : "Click anywhere on the map to update coordinates"}
+          </span>
         </div>
 
         <div className="pointer-events-none absolute top-2 right-2 z-[400] flex items-center gap-1.5 rounded-md bg-[#070b12]/90 border border-slate-700/80 px-2 py-1 text-[11px] text-emerald-300 tabular-telemetry">

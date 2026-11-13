@@ -1,10 +1,12 @@
 "use client";
 
+import { useLanguage } from "@/app/providers";
 import { Card, CardBody, Chip } from "@heroui/react";
 import { PathwayId, PathwaySimulationResult } from "@/lib/simulationEngine";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   Droplets,
   PackageCheck,
@@ -25,6 +27,9 @@ export function PathwayCards({
   selectedPathwayId,
   onSelectPathway,
 }: PathwayCardsProps) {
+  const { isAr } = useLanguage();
+  const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       {ORDERED_IDS.map((pid) => {
@@ -46,6 +51,9 @@ export function PathwayCards({
             ? AlertTriangle
             : ShieldCheck;
 
+        const currency = isAr ? "ج" : "EGP";
+        const conflictText = isAr ? item.conflictDetailsAr : item.conflictDetailsEn;
+
         return (
           <Card
             key={pid}
@@ -55,7 +63,7 @@ export function PathwayCards({
             className={`border transition-colors ${borderClass}`}
             shadow="none"
           >
-            <CardBody className="p-3.5 gap-2.5 text-right flex flex-col justify-between">
+            <CardBody className="p-3.5 gap-2.5 text-start flex flex-col justify-between">
               <div className="flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -69,7 +77,7 @@ export function PathwayCards({
                       }`}
                     />
                     <span className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                      {item.titleAr}
+                      {isAr ? item.titleAr : item.titleEn}
                     </span>
                   </div>
 
@@ -80,7 +88,7 @@ export function PathwayCards({
                       color={item.colorTheme}
                       className="h-5 text-[11px] font-semibold"
                     >
-                      {item.badgeAr}
+                      {isAr ? item.badgeAr : item.badgeEn}
                     </Chip>
                     {isSelected && (
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -89,7 +97,7 @@ export function PathwayCards({
                 </div>
 
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {item.summaryAr}
+                  {isAr ? item.summaryAr : item.summaryEn}
                 </p>
 
                 {/* 3-Season Sequence */}
@@ -101,14 +109,14 @@ export function PathwayCards({
                     >
                       <span className="hud-inset inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-slate-900 dark:text-slate-100 font-semibold">
                         <span>
-                          {idx + 1}. {crop.nameAr}
+                          {idx + 1}. {isAr ? crop.nameAr : crop.nameEn}
                         </span>
                         <span className="text-[10px] font-normal text-slate-500 dark:text-slate-400">
-                          ({crop.familyAr})
+                          ({isAr ? crop.familyAr : crop.family})
                         </span>
                       </span>
                       {idx < 2 && (
-                        <ArrowLeft className="h-3 w-3 text-slate-400 dark:text-slate-500" />
+                        <ArrowIcon className="h-3 w-3 text-slate-400 dark:text-slate-500" />
                       )}
                     </div>
                   ))}
@@ -118,14 +126,16 @@ export function PathwayCards({
               <div className="flex flex-col gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
                 <div className="flex items-center justify-between gap-2 text-xs tabular-telemetry">
                   <span className="text-slate-700 dark:text-slate-300">
-                    المتوسط المتوقع:{" "}
+                    {isAr ? "المتوسط المتوقع:" : "Expected Median:"}{" "}
                     <strong className="text-slate-950 dark:text-slate-50">
-                      {item.p50Egp.toLocaleString("en-US")} ج
+                      {item.p50Egp.toLocaleString("en-US")} {currency}
                     </strong>
                   </span>
                   <span className="text-amber-700 dark:text-amber-300">
-                    أسوأ سنة:{" "}
-                    <strong>{item.p10Egp.toLocaleString("en-US")} ج</strong>
+                    {isAr ? "أسوأ سنة:" : "Worst Year:"}{" "}
+                    <strong>
+                      {item.p10Egp.toLocaleString("en-US")} {currency}
+                    </strong>
                   </span>
                 </div>
 
@@ -139,22 +149,30 @@ export function PathwayCards({
                   >
                     <PackageCheck className="h-3.5 w-3.5" />
                     {item.ureaSacksSaved > 0
-                      ? `توفير ${item.ureaSacksSaved} شكارة يوريا`
+                      ? isAr
+                        ? `توفير ${item.ureaSacksSaved} شكارة يوريا`
+                        : `Save ${item.ureaSacksSaved} Urea Sacks`
                       : item.netUreaBags < 0
-                      ? `يحتاج ${Math.abs(item.netUreaBags)} شكارة يوريا إضافية`
-                      : "متعادل سمادياً"}
+                      ? isAr
+                        ? `يحتاج ${Math.abs(item.netUreaBags)} شكارة يوريا إضافية`
+                        : `Needs +${Math.abs(item.netUreaBags)} Urea Sacks`
+                      : isAr
+                      ? "متعادل سمادياً"
+                      : "Nitrogen Neutral"}
                   </span>
 
                   <span className="flex items-center gap-1 text-sky-700 dark:text-sky-300 font-semibold">
                     <Droplets className="h-3.5 w-3.5" />
-                    توفير {item.waterSavedPct}% ماء
+                    {isAr
+                      ? `توفير ${item.waterSavedPct}% ماء`
+                      : `Save ${item.waterSavedPct}% Water`}
                   </span>
                 </div>
 
-                {item.hasFamilyConflict && item.conflictDetailsAr && (
+                {item.hasFamilyConflict && conflictText && (
                   <div className="flex items-start gap-1.5 rounded-md bg-rose-500/10 border border-rose-500/35 px-2.5 py-1.5 text-[11px] text-rose-800 dark:text-rose-200 leading-snug">
                     <AlertTriangle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                    <span>{item.conflictDetailsAr}</span>
+                    <span>{conflictText}</span>
                   </div>
                 )}
               </div>

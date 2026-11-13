@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/app/providers";
 import {
   Button,
   ButtonGroup,
@@ -84,6 +85,7 @@ function buildInitialState(): FieldShiftApiResponse {
       powerLive: false,
       asfLive: false,
       modeLabelAr: "بيانات دلتا النيل المحفوظة (Offline Fallback)",
+      modeLabelEn: "Cached Nile Delta Climate Baseline (Offline Fallback)",
     },
     rawJson: buildRawNasaPayload({
       gov,
@@ -100,6 +102,7 @@ function buildInitialState(): FieldShiftApiResponse {
 }
 
 export default function OrbitAgriCockpitPage() {
+  const { isAr } = useLanguage();
   const [govId, setGovId] = useState<string>(GOVERNORATES[0].id);
   const [coords, setCoords] = useState<{ lat: number; lon: number }>({
     lat: GOVERNORATES[0].lat,
@@ -177,13 +180,17 @@ export default function OrbitAgriCockpitPage() {
           signal: controller.signal,
           body: JSON.stringify({
             governorateNameAr: simState.governorate.nameAr,
+            governorateNameEn: simState.governorate.nameEn,
             prevCropNameAr: prevCrop.nameAr,
+            prevCropNameEn: prevCrop.nameEn,
             heatStressC: simState.heatStressC,
             waterDeficitPct: simState.waterDeficitPct,
             selectedPathway: {
               id: selected.id,
               titleAr: selected.titleAr,
+              titleEn: selected.titleEn,
               seasonsNamesAr: selected.seasons.map((s) => s.nameAr),
+              seasonsNamesEn: selected.seasons.map((s) => s.nameEn),
               p10Egp: selected.p10Egp,
               p50Egp: selected.p50Egp,
               p90Egp: selected.p90Egp,
@@ -192,6 +199,7 @@ export default function OrbitAgriCockpitPage() {
               waterSavedPct: selected.waterSavedPct,
               hasFamilyConflict: selected.hasFamilyConflict,
               conflictDetailsAr: selected.conflictDetailsAr,
+              conflictDetailsEn: selected.conflictDetailsEn,
             },
             cashPathway: {
               p10Egp: cash.p10Egp,
@@ -214,12 +222,20 @@ export default function OrbitAgriCockpitPage() {
           setCopilot({
             mode: "offline-agronomic-advisor",
             headlineAr: `ملخص القرار في ${simState.governorate.nameAr}`,
+            headlineEn: `Decision Summary for ${simState.governorate.nameEn}`,
             adviceAr: `المسار المختار (${selected.titleAr}) بيحقق متوسط ربح ${selected.p50Egp.toLocaleString(
               "en-US"
             )} جنيه/فدان مع توفير ${selected.ureaSacksSaved} شكارة يوريا و${selected.waterSavedPct}% من مياه الري.`,
+            adviceEn: `The selected ${selected.titleEn} yields a median profit of ${selected.p50Egp.toLocaleString(
+              "en-US"
+            )} EGP/feddan while saving ${selected.ureaSacksSaved} urea sacks and ${selected.waterSavedPct}% irrigation water.`,
             actionChecklistAr: [
               `حافظ على تنويع العائلة النباتية بعد ${prevCrop.nameAr}.`,
               `استعد لموجة حر +${simState.heatStressC}°C بمتابعة رطوبة التربة من قمر ناسا (SMAP).`,
+            ],
+            actionChecklistEn: [
+              `Keep botanical family diversity after ${prevCrop.nameEn}.`,
+              `Prepare for +${simState.heatStressC}°C heat stress by monitoring NASA SMAP root moisture.`,
             ],
           });
         }
@@ -305,12 +321,16 @@ export default function OrbitAgriCockpitPage() {
 
   const activePathway = instantData.pathways[selectedPathwayId];
   const cashPathway = instantData.pathways.cash;
-  const activePrevFamilyAr = CROPS_MATRIX[prevCropId]?.familyAr ?? "";
+  const activePrevCrop = CROPS_MATRIX[prevCropId];
+  const activePrevFamily = isAr
+    ? activePrevCrop?.familyAr ?? ""
+    : activePrevCrop?.family ?? "";
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-ground)] text-[var(--text-main)] transition-colors duration-200">
       <TopMissionBar
         governorateNameAr={instantData.governorate.nameAr}
+        governorateNameEn={instantData.governorate.nameEn}
         coordinates={instantData.coordinates}
         thermalAnomalyC={instantData.multiScale.power.thermalAnomalyC}
         rootMoisturePct={instantData.multiScale.smap.rootMoisturePct}
@@ -326,26 +346,38 @@ export default function OrbitAgriCockpitPage() {
       <main className="mx-auto w-full max-w-[1440px] flex-1 p-4 lg:p-6 flex flex-col gap-5">
         {/* Step 1 & Step 2 Row */}
         <div className="grid grid-cols-12 gap-4 items-stretch">
-          {/* Step 1: أرضك والمحصول السابق */}
+          {/* Step 1: Location & Previous Crop */}
           <section
-            aria-label="الخطوة الأولى: أرضك والمحصول السابق"
+            aria-label={
+              isAr
+                ? "الخطوة الأولى: أرضك والمحصول السابق"
+                : "Step 1: Your Land & Previous Crop"
+            }
             className="col-span-12 lg:col-span-7 hud-panel rounded-2xl p-4 lg:p-5 flex flex-col gap-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Compass className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <h1 className="text-base font-bold text-slate-900 dark:text-slate-50">
-                  ١. أرضك والمحصول السابق
+                  {isAr
+                    ? "١. أرضك والمحصول السابق"
+                    : "1. Your Land & Previous Crop"}
                 </h1>
               </div>
               <span className="text-xs text-slate-600 dark:text-slate-400">
-                تربة {instantData.governorate.soilTypeAr}
+                {isAr
+                  ? `تربة ${instantData.governorate.soilTypeAr}`
+                  : `Soil: ${instantData.governorate.soilTypeEn}`}
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-end">
               <Select
-                label="اختر المحافظة (أو اضغط على الخريطة)"
+                label={
+                  isAr
+                    ? "اختر المحافظة (أو اضغط على الخريطة)"
+                    : "Select Governorate (or click map)"
+                }
                 size="sm"
                 variant="bordered"
                 selectedKeys={[govId]}
@@ -368,11 +400,16 @@ export default function OrbitAgriCockpitPage() {
                 }}
               >
                 {GOVERNORATES.map((gov) => (
-                  <SelectItem key={gov.id} textValue={gov.nameAr}>
+                  <SelectItem
+                    key={gov.id}
+                    textValue={isAr ? gov.nameAr : gov.nameEn}
+                  >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold">{gov.nameAr}</span>
+                      <span className="font-semibold">
+                        {isAr ? gov.nameAr : gov.nameEn}
+                      </span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {gov.regionAr}
+                        {isAr ? gov.regionAr : gov.regionEn}
                       </span>
                     </div>
                   </SelectItem>
@@ -383,14 +420,16 @@ export default function OrbitAgriCockpitPage() {
                 <div className="flex items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
                   <span className="flex items-center gap-1.5 font-semibold">
                     <Sprout className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                    المحصول السابق
+                    {isAr ? "المحصول السابق" : "Previous Crop"}
                   </span>
                   <Chip
                     size="sm"
                     variant="flat"
                     className="h-5 text-[11px] bg-slate-200 text-slate-800 dark:bg-slate-800/80 dark:text-slate-300"
                   >
-                    العائلة {activePrevFamilyAr}
+                    {isAr
+                      ? `العائلة ${activePrevFamily}`
+                      : `Family: ${activePrevFamily}`}
                   </Chip>
                 </div>
 
@@ -408,7 +447,7 @@ export default function OrbitAgriCockpitPage() {
                             : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-[#090f1b] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800/70"
                         }
                       >
-                        {crop.labelAr}
+                        {isAr ? crop.labelAr : crop.labelEn}
                       </Button>
                     );
                   })}
@@ -420,14 +459,19 @@ export default function OrbitAgriCockpitPage() {
               lat={instantData.coordinates.lat}
               lon={instantData.coordinates.lon}
               governorateNameAr={instantData.governorate.nameAr}
+              governorateNameEn={instantData.governorate.nameEn}
               ndviValue={instantData.multiScale.modis.ndviValue}
               onSelectLocation={handleMapClick}
             />
           </section>
 
-          {/* Step 2: اختبار ظروف المناخ + قراءات ناسا المبسطة */}
+          {/* Step 2: Climate Stress Testing + Multi-Scale Telemetry */}
           <section
-            aria-label="الخطوة الثانية: اختبار ظروف المناخ"
+            aria-label={
+              isAr
+                ? "الخطوة الثانية: اختبار ظروف المناخ"
+                : "Step 2: Climate Stress Testing"
+            }
             className="col-span-12 lg:col-span-5 hud-panel rounded-2xl p-4 lg:p-5 flex flex-col justify-between gap-4"
           >
             <div className="flex flex-col gap-4">
@@ -435,11 +479,13 @@ export default function OrbitAgriCockpitPage() {
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
                   <h2 className="text-base font-bold text-slate-900 dark:text-slate-50">
-                    ٢. اختبار ظروف المناخ
+                    {isAr ? "٢. اختبار ظروف المناخ" : "2. Climate Stress Testing"}
                   </h2>
                 </div>
                 <span className="text-xs text-slate-600 dark:text-slate-400">
-                  جرّب صدمات الحر والمياه
+                  {isAr
+                    ? "جرّب صدمات الحر والمياه"
+                    : "Simulate heat & water shocks"}
                 </span>
               </div>
 
@@ -457,20 +503,28 @@ export default function OrbitAgriCockpitPage() {
           </section>
         </div>
 
-        {/* Step 3: قارن واختار مسارك (3 مواسم متتالية) */}
+        {/* Step 3: Compare & Choose Pathway (3 Consecutive Seasons) */}
         <section
-          aria-label="الخطوة الثالثة: قارن واختار مسارك"
+          aria-label={
+            isAr
+              ? "الخطوة الثالثة: قارن واختار مسارك"
+              : "Step 3: Compare & Choose Your Pathway"
+          }
           className="hud-panel rounded-2xl p-4 lg:p-5 flex flex-col gap-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <GitCompareArrows className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-50">
-                ٣. قارن واختار مسارك (3 مواسم متتالية)
+                {isAr
+                  ? "٣. قارن واختار مسارك (3 مواسم متتالية)"
+                  : "3. Compare & Choose Your Pathway (3 Consecutive Seasons)"}
               </h2>
             </div>
             <span className="text-xs text-slate-600 dark:text-slate-400">
-              اضغط على أي مسار لمقارنة المكاسب والمخاطر عبر 10 سنوات من بيانات ناسا
+              {isAr
+                ? "اضغط على أي مسار لمقارنة المكاسب والمخاطر عبر 10 سنوات من بيانات ناسا"
+                : "Select any pathway to reveal 10-year NASA climate tradeoffs and risk bands"}
             </span>
           </div>
 
@@ -518,6 +572,7 @@ export default function OrbitAgriCockpitPage() {
         onOpenChange={setIsRawModalOpen}
         rawJson={instantData.rawJson}
         sourceLabelAr={instantData.sourceStatus.modeLabelAr}
+        sourceLabelEn={instantData.sourceStatus.modeLabelEn}
         powerLive={instantData.sourceStatus.powerLive}
         asfLive={instantData.sourceStatus.asfLive}
       />

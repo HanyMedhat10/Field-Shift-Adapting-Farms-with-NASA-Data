@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/app/providers";
 import { Button, Chip, Skeleton } from "@heroui/react";
 import { CopilotApiResponse } from "@/types/fieldShift";
 import { Bot, CheckCircle2, RefreshCw } from "lucide-react";
@@ -15,6 +16,8 @@ export function AiCopilotCard({
   loading,
   onRefresh,
 }: AiCopilotCardProps) {
+  const { isAr } = useLanguage();
+
   return (
     <div className="hud-subpanel rounded-lg p-3.5 flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-2">
@@ -23,7 +26,9 @@ export function AiCopilotCard({
             <Bot className="h-4 w-4" />
           </div>
           <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-            المستشار الزراعي الذكي (بالعامية المصرية)
+            {isAr
+              ? "المستشار الزراعي الذكي (بالعامية المصرية)"
+              : "AI Agronomy Copilot (Gemini / Smart Advisor)"}
           </span>
         </div>
 
@@ -42,7 +47,7 @@ export function AiCopilotCard({
             isIconOnly
             size="sm"
             variant="light"
-            aria-label="تحديث نصيحة المستشار الذكي"
+            aria-label={isAr ? "تحديث نصيحة المستشار الذكي" : "Refresh AI advice"}
             onPress={onRefresh}
             isDisabled={loading}
             className="h-7 w-7 min-w-7 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
@@ -62,21 +67,23 @@ export function AiCopilotCard({
       ) : (
         <div className="flex flex-col gap-2">
           <h3 className="text-xs font-bold text-emerald-700 dark:text-emerald-300 leading-snug">
-            {copilot.headlineAr}
+            {isAr ? copilot.headlineAr : copilot.headlineEn}
           </h3>
           <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-200">
-            {copilot.adviceAr}
+            {isAr ? copilot.adviceAr : copilot.adviceEn}
           </p>
           <ul className="flex flex-col gap-1.5 pt-1.5 border-t border-slate-200 dark:border-slate-800/80">
-            {copilot.actionChecklistAr.map((step, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 leading-snug"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <span>{step}</span>
-              </li>
-            ))}
+            {(isAr ? copilot.actionChecklistAr : copilot.actionChecklistEn).map(
+              (step, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 leading-snug"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{step}</span>
+                </li>
+              )
+            )}
           </ul>
         </div>
       )}

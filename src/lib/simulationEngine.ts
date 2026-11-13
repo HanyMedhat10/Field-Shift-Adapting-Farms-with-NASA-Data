@@ -19,11 +19,13 @@ export interface RadarScores {
 export interface FieldPlotCell {
   index: number;
   labelAr: string;
+  labelEn: string;
   season1Crop: CropInfo;
   season2Crop: CropInfo;
   season3Crop: CropInfo;
   hasConflict: boolean;
   conflictReasonAr: string | null;
+  conflictReasonEn: string | null;
   nitrogenBalanceKg: number;
   waterDemandM3: number;
   healthScore: number;
@@ -32,13 +34,18 @@ export interface FieldPlotCell {
 export interface PathwaySimulationResult {
   id: PathwayId;
   titleAr: string;
+  titleEn: string;
   badgeAr: string;
+  badgeEn: string;
   summaryAr: string;
+  summaryEn: string;
   plainSummaryLinesAr: [string, string, string];
+  plainSummaryLinesEn: [string, string, string];
   colorTheme: "success" | "danger" | "primary";
   seasons: [CropInfo, CropInfo, CropInfo];
   hasFamilyConflict: boolean;
   conflictDetailsAr: string | null;
+  conflictDetailsEn: string | null;
   p10Egp: number;
   p50Egp: number;
   p90Egp: number;
@@ -103,13 +110,14 @@ function clamp(val: number, min: number, max: number): number {
 function detectFamilyConflict(
   prevCrop: CropInfo,
   seasons: [CropInfo, CropInfo, CropInfo]
-): { hasConflict: boolean; detailsAr: string | null } {
+): { hasConflict: boolean; detailsAr: string | null; detailsEn: string | null } {
   const sequence = [prevCrop, ...seasons];
   for (let i = 1; i < sequence.length; i++) {
     if (sequence[i].family === sequence[i - 1].family) {
       return {
         hasConflict: true,
         detailsAr: `تنبيه تعارض نباتي (-18%): زراعة ${sequence[i].nameAr} بعد ${sequence[i - 1].nameAr} تكرر العائلة ${sequence[i].familyAr} وترفع مخاطر الآفات والنيماتودا.`,
+        detailsEn: `Botanical Clash Warning (-18%): Planting ${sequence[i].nameEn} after ${sequence[i - 1].nameEn} repeats the ${sequence[i].family} family and raises pest & nematode risk.`,
       };
     }
   }
@@ -118,9 +126,10 @@ function detectFamilyConflict(
     return {
       hasConflict: true,
       detailsAr: `تنبيه (-18%): تكرار العائلة ${prevCrop.familyAr} خلال 3 مواسم يضعف التربة ويزيد الآفات.`,
+      detailsEn: `Warning (-18%): Repeating ${prevCrop.family} within 3 seasons depletes soil health and elevates pest buildup.`,
     };
   }
-  return { hasConflict: false, detailsAr: null };
+  return { hasConflict: false, detailsAr: null, detailsEn: null };
 }
 
 function buildFieldGrid(
@@ -131,19 +140,19 @@ function buildFieldGrid(
   heatStressC: number,
   waterDeficitPct: number
 ): FieldPlotCell[] {
-  const sectorLabels = [
-    "حوض ١ - شمال شرق",
-    "حوض ٢ - شمال وسط",
-    "حوض ٣ - شمال غرب",
-    "حوض ٤ - قلب الفدان",
-    "حوض ٥ - المروى الرئيسي",
-    "حوض ٦ - وسط غرب",
-    "حوض ٧ - جنوب شرق",
-    "حوض ٨ - جنوب وسط",
-    "حوض ٩ - مصرف الحقل",
+  const sectorLabels: { ar: string; en: string }[] = [
+    { ar: "حوض ١ - شمال شرق", en: "Plot 1 - Northeast" },
+    { ar: "حوض ٢ - شمال وسط", en: "Plot 2 - North Center" },
+    { ar: "حوض ٣ - شمال غرب", en: "Plot 3 - Northwest" },
+    { ar: "حوض ٤ - قلب الفدان", en: "Plot 4 - Feddan Core" },
+    { ar: "حوض ٥ - المروى الرئيسي", en: "Plot 5 - Main Canal" },
+    { ar: "حوض ٦ - وسط غرب", en: "Plot 6 - Mid West" },
+    { ar: "حوض ٧ - جنوب شرق", en: "Plot 7 - Southeast" },
+    { ar: "حوض ٨ - جنوب وسط", en: "Plot 8 - South Center" },
+    { ar: "حوض ٩ - مصرف الحقل", en: "Plot 9 - Field Drain" },
   ];
 
-  return sectorLabels.map((labelAr, idx) => {
+  return sectorLabels.map((label, idx) => {
     const microFactor = idx === 4 ? 1.04 : idx === 8 ? 0.94 : 0.97 + (idx % 3) * 0.025;
     const netN = Math.round(
       ((seasons[0].nitrogenKgPerFeddan +
@@ -172,13 +181,17 @@ function buildFieldGrid(
 
     return {
       index: idx + 1,
-      labelAr,
+      labelAr: label.ar,
+      labelEn: label.en,
       season1Crop: seasons[0],
       season2Crop: seasons[1],
       season3Crop: seasons[2],
       hasConflict: plotConflict,
       conflictReasonAr: plotConflict
         ? `تراكم آفات العائلة ${seasons[0].familyAr} (-18%)`
+        : null,
+      conflictReasonEn: plotConflict
+        ? `${seasons[0].family} pest buildup (-18%)`
         : null,
       nitrogenBalanceKg: netN,
       waterDemandM3: totalWater,
@@ -203,6 +216,7 @@ export function runFieldShiftSimulation(
       netNitrogenKg: number;
       hasConflict: boolean;
       conflictDetailsAr: string | null;
+      conflictDetailsEn: string | null;
       avgPestBreak: number;
       avgHeatTolerance: number;
     }
@@ -284,6 +298,7 @@ export function runFieldShiftSimulation(
       netNitrogenKg,
       hasConflict: conflict.hasConflict,
       conflictDetailsAr: conflict.detailsAr,
+      conflictDetailsEn: conflict.detailsEn,
       avgPestBreak,
       avgHeatTolerance,
     };
@@ -294,27 +309,47 @@ export function runFieldShiftSimulation(
 
   const metaByPathway: Record<
     PathwayId,
-    { titleAr: string; badgeAr: string; summaryAr: string; colorTheme: "success" | "danger" | "primary" }
+    {
+      titleAr: string;
+      titleEn: string;
+      badgeAr: string;
+      badgeEn: string;
+      summaryAr: string;
+      summaryEn: string;
+      colorTheme: "success" | "danger" | "primary";
+    }
   > = {
     balanced: {
       titleAr: "المسار المتوازن الذكي",
+      titleEn: "Smart Balanced Rotation",
       badgeAr: "موصى به",
+      badgeEn: "Recommended",
       summaryAr:
         "يدخل البقوليات لتثبيت النيتروجين طبيعياً، يكسر دورة الآفات، ويوفر شكاير سماد اليوريا.",
+      summaryEn:
+        "Integrates legumes to fix nitrogen naturally, breaks soil pest cycles, and cuts urea fertilizer sacks.",
       colorTheme: "success",
     },
     cash: {
       titleAr: "المسار النقدي السريع",
+      titleEn: "Cash-First Intensive",
       badgeAr: "عالي المخاطرة",
+      badgeEn: "High Risk",
       summaryAr:
         "محاصيل نقدية سريعة العائد لكنها تكشف استنزاف التربة وخصم 18% عند تكرار العائلة النباتية.",
+      summaryEn:
+        "High short-term cash crops that expose soil depletion and trigger an 18% pest penalty on family clashes.",
       colorTheme: "danger",
     },
     resilient: {
       titleAr: "مسار الصمود المناخي وتوفير المياه",
+      titleEn: "Climate & Water Resilient",
       badgeAr: "تحمل الحر والجفاف",
+      badgeEn: "Heat & Drought Shield",
       summaryAr:
         "محاصيل جذور عميقة تتحمل العطش وموجات الحر بأقل خسارة في سنوات الجفاف.",
+      summaryEn:
+        "Deep-rooted, drought- and heat-tolerant crops engineered to minimize yield drops in arid years.",
       colorTheme: "primary",
     },
   };
@@ -415,16 +450,42 @@ export function runFieldShiftSimulation(
             `يكسر دورة الآفات بعد ${prevCrop.nameAr} بدون أي تكرار للعائلة النباتية، فيحمي أرضك من خصم الـ 18% ومن إجهاد السماد.`,
           ];
 
+    const plainSummaryLinesEn: [string, string, string] =
+      pid === "cash"
+        ? [
+            `In the worst climate year, income drops to ${p10Txt} EGP/feddan (vs. ${p50Txt} EGP median) due to heat and drought sensitivity.`,
+            `This sequence consumes ${Math.abs(netUreaBags)} extra 46% urea sacks and demands heavy irrigation volumes.`,
+            raw.hasConflict
+              ? `Repeats the same botanical family after ${prevCrop.nameEn}, triggering an 18% pest and nematode penalty.`
+              : `Fails to replenish soil fertility after ${prevCrop.nameEn}, raising fertilizer costs in upcoming seasons.`,
+          ]
+        : pid === "resilient"
+        ? [
+            `Protects your downside in the worst climate year at ${p10Txt} EGP/feddan (${p50Txt} EGP median) even under +${heatStressC}°C heat.`,
+            `Saves ${waterSavedPct}% irrigation water and ${ureaSacksSaved} urea sacks compared to the Cash track via deep roots.`,
+            `Diversifies botanical families after ${prevCrop.nameEn}, eliminating the -18% pest penalty while preserving root moisture.`,
+          ]
+        : [
+            `Delivers balanced stability with ${p10Txt} EGP/feddan worst-year floor and ${p50Txt} EGP expected median across 3 seasons.`,
+            `Integrates legumes to fix nitrogen, saving ${ureaSacksSaved} sacks of 46% urea and reducing irrigation demand by ${waterSavedPct}%.`,
+            `Breaks pest cycles after ${prevCrop.nameEn} with zero family overlap, avoiding the 18% yield penalty and fertilizer strain.`,
+          ];
+
     finalResults[pid] = {
       id: pid,
       titleAr: metaByPathway[pid].titleAr,
+      titleEn: metaByPathway[pid].titleEn,
       badgeAr: metaByPathway[pid].badgeAr,
+      badgeEn: metaByPathway[pid].badgeEn,
       summaryAr: metaByPathway[pid].summaryAr,
+      summaryEn: metaByPathway[pid].summaryEn,
       plainSummaryLinesAr,
+      plainSummaryLinesEn,
       colorTheme: metaByPathway[pid].colorTheme,
       seasons: raw.seasons,
       hasFamilyConflict: raw.hasConflict,
       conflictDetailsAr: raw.conflictDetailsAr,
+      conflictDetailsEn: raw.conflictDetailsEn,
       p10Egp,
       p50Egp,
       p90Egp,

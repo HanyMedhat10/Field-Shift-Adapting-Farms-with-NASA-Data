@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@/app/providers";
+import { useLanguage, useTheme } from "@/app/providers";
 import {
   Chart as ChartJS,
   Filler,
@@ -32,6 +32,7 @@ export function TradeoffRadar({
   cashPathway,
 }: TradeoffRadarProps) {
   const { isDark } = useTheme();
+  const { isAr } = useLanguage();
   const isCashSelected = selectedPathway.id === "cash";
 
   const selectedFill =
@@ -50,7 +51,7 @@ export function TradeoffRadar({
 
   const datasets = [
     {
-      label: selectedPathway.titleAr,
+      label: isAr ? selectedPathway.titleAr : selectedPathway.titleEn,
       data: [
         selectedPathway.radar.cashReturn,
         selectedPathway.radar.waterSaving,
@@ -69,7 +70,7 @@ export function TradeoffRadar({
 
   if (!isCashSelected) {
     datasets.push({
-      label: cashPathway.titleAr,
+      label: isAr ? cashPathway.titleAr : cashPathway.titleEn,
       data: [
         cashPathway.radar.cashReturn,
         cashPathway.radar.waterSaving,
@@ -86,30 +87,35 @@ export function TradeoffRadar({
     });
   }
 
-  const axisItems = [
-    { label: "الربح المادي", value: selectedPathway.radar.cashReturn },
-    { label: "توفير المياه", value: selectedPathway.radar.waterSaving },
-    { label: "خصوبة التربة", value: selectedPathway.radar.nitrogenCharge },
-    { label: "تحمل الحر", value: selectedPathway.radar.heatResilience },
-    { label: "مقاومة الآفات", value: selectedPathway.radar.pestBreak },
-  ];
+  const axisItems = isAr
+    ? [
+        { label: "الربح المادي", value: selectedPathway.radar.cashReturn },
+        { label: "توفير المياه", value: selectedPathway.radar.waterSaving },
+        { label: "خصوبة التربة", value: selectedPathway.radar.nitrogenCharge },
+        { label: "تحمل الحر", value: selectedPathway.radar.heatResilience },
+        { label: "مقاومة الآفات", value: selectedPathway.radar.pestBreak },
+      ]
+    : [
+        { label: "Cash Return", value: selectedPathway.radar.cashReturn },
+        { label: "Water Saving", value: selectedPathway.radar.waterSaving },
+        { label: "Soil Fertility", value: selectedPathway.radar.nitrogenCharge },
+        { label: "Heat Tolerance", value: selectedPathway.radar.heatResilience },
+        { label: "Pest Break", value: selectedPathway.radar.pestBreak },
+      ];
 
   return (
     <div className="hud-subpanel rounded-lg p-3 flex flex-col gap-2.5">
       <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-        مقارنة المكاسب والتضحيات (أمام المسار النقدي)
+        {isAr
+          ? "مقارنة المكاسب والتضحيات (أمام المسار النقدي)"
+          : "Tradeoff Radar Comparison (vs. Cash Baseline)"}
       </div>
 
       <div className="h-[225px] w-full">
         <Radar
+          key={`${isAr ? "ar" : "en"}-${isDark ? "dark" : "light"}`}
           data={{
-            labels: [
-              "الربح المادي",
-              "توفير المياه",
-              "خصوبة التربة",
-              "تحمل الحر",
-              "مقاومة الآفات",
-            ],
+            labels: axisItems.map((a) => a.label),
             datasets,
           }}
           options={{
