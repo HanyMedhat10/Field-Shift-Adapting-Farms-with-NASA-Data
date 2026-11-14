@@ -6,6 +6,7 @@ import {
   BookOpen,
   Database,
   Droplets,
+  Gamepad2,
   Globe,
   MapPin,
   Moon,
@@ -133,6 +134,18 @@ export function TopMissionBar({
                 : isAr
                 ? "الوضع الليلي"
                 : "Dark Mode"}
+            </Button>
+
+            <Button
+              as={Link}
+              href="/game"
+              size="sm"
+              color="success"
+              variant="solid"
+              startContent={<Gamepad2 className="h-3.5 w-3.5" />}
+              className="font-bold text-white"
+            >
+              {isAr ? "العب المزرعة السعيدة" : "Play ElMazra3a Game"}
             </Button>
 
             <Button

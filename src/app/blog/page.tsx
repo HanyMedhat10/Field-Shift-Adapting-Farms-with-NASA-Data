@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Database,
   Flame,
+  Gamepad2,
   Globe,
   Layers,
   Moon,
@@ -651,6 +652,20 @@ export default function RegionalAnalyticsBlogPage() {
               className="font-bold"
             >
               {isAr ? "العودة لقمرة القرار" : "Back to Decision Cockpit"}
+            </Button>
+
+            <Button
+              as={Link}
+              href="/game"
+              size="sm"
+              variant="bordered"
+              color="default"
+              startContent={
+                <Gamepad2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              }
+              className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 hover:border-emerald-500/60 font-semibold"
+            >
+              {isAr ? "العب المزرعة السعيدة" : "Play ElMazra3a Game"}
             </Button>
 
             <Button
